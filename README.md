@@ -22,7 +22,12 @@ Pushes to `main` build and deploy via `.github/workflows/deploy-pages.yml`. Loca
 
 ## Cat World
 
-Stylized Quaternius cat in a Polyhaven yard. Keys are a nudge, not a remote. Facts appear after each reaction.
+Stylized Quaternius cat in a Polyhaven yard.
+
+- WASD and arrow keys walk a short step that way, then idle.
+- Space always jumps.
+- Other keys still surprise the cat (weighted nudge). `A` is left, not meow.
+- Facts appear after each reaction.
 
 Assets live under `public/assets/cat-world`.
 

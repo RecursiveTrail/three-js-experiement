@@ -18,7 +18,7 @@ import {
   type Vec3,
 } from './idleLife'
 
-export const CAT_SCALE = 0.3
+export const CAT_SCALE: [number, number, number] = [0.28, 0.26, 0.38]
 export const CAT_YAW_OFFSET = 0
 export const CAT_URL = assetUrl('assets/cat-world/cat.glb')
 
@@ -78,6 +78,7 @@ export function RiggedCat({
   useEffect(() => {
     scene.traverse((o) => {
       o.castShadow = true
+      if (/head/i.test(o.name)) o.scale.setScalar(0.85)
     })
   }, [scene])
 
