@@ -1,0 +1,26 @@
+---
+description: Use gh for all GitHub network operations; do not use SSH git
+alwaysApply: true
+---
+
+# Always use gh
+
+SSH to `git@github.com` fails on this machine (`Permission denied (publickey)`). Never `git push`, `git pull`, or `git fetch` over the `origin` SSH URL.
+
+- Issues, PRs, checks, releases, and GitHub API: `gh` only.
+- Push/pull/fetch: HTTPS with a one-shot `gh` credential helper. Do **not** run `gh auth setup-git` or change git config.
+
+```bash
+# ✅ push current branch
+git -c credential.helper='!f() { echo "username=x-access-token"; echo "password=$(gh auth token)"; }; f' \
+  push https://github.com/RecursiveTrail/three-js-experiement.git HEAD
+
+# ✅ update origin/main tracking after a push
+git -c credential.helper='!f() { echo "username=x-access-token"; echo "password=$(gh auth token)"; }; f' \
+  fetch https://github.com/RecursiveTrail/three-js-experiement.git main:refs/remotes/origin/main
+
+# ❌ BAD
+git push origin main
+git pull
+ssh git@github.com
+```
