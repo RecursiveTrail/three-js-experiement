@@ -7,9 +7,19 @@ import { LoopOnce, LoopRepeat } from 'three'
 import { assetUrl } from '../../shared/assetUrl'
 import type { LogicalAction } from './actions'
 import { bindingFor } from './clipMap'
-import { clampToYard, figureEight } from './idleLife'
+import {
+  clampToYard,
+  destinationFor,
+  figureEight,
+  JUMP_DURATION_S,
+  STEP_DURATION_S,
+  yawFromFacing,
+  type MoveMode,
+  type Vec3,
+} from './idleLife'
 
 export const CAT_SCALE = 0.3
+export const CAT_YAW_OFFSET = 0
 export const CAT_URL = assetUrl('assets/cat-world/cat.glb')
 
 export function PlaceholderCat({
@@ -44,11 +54,15 @@ export function PlaceholderCat({
 export function RiggedCat({
   action,
   seq,
+  facing,
+  moveMode,
   onActionEnd,
   positionRef,
 }: {
   action: LogicalAction
   seq: number
+  facing: Vec3
+  moveMode: MoveMode
   onActionEnd: () => void
   positionRef: MutableRefObject<[number, number, number]>
 }) {
@@ -56,6 +70,10 @@ export function RiggedCat({
   const { scene, animations } = useGLTF(CAT_URL)
   const { actions, mixer } = useAnimations(animations, group)
   const binding = bindingFor(action)
+  const startRef = useRef<Vec3>([0, 0, 0])
+  const destRef = useRef<Vec3>([0, 0, 0])
+  const elapsedRef = useRef(0)
+  const tRef = useRef(0)
 
   useEffect(() => {
     scene.traverse((o) => {
@@ -82,22 +100,46 @@ export function RiggedCat({
     return () => mixer.removeEventListener('finished', done)
   }, [action, seq, actions, binding, mixer, onActionEnd])
 
-  const tRef = useRef(0)
+  useEffect(() => {
+    const from = positionRef.current
+    startRef.current = from
+    destRef.current = destinationFor(action, moveMode, facing, from)
+    elapsedRef.current = 0
+  }, [action, seq, facing, moveMode, positionRef])
+
   useFrame((_, dt) => {
-    if (action !== 'walk' && action !== 'trot') return
-    tRef.current += dt * (action === 'trot' ? 1.1 : 0.6)
-    const [x, z] = figureEight(tRef.current, 1.8)
-    const [cx, cz] = clampToYard(x, z)
-    positionRef.current = [cx, 0, cz]
-    if (group.current) group.current.position.set(cx, 0, cz)
+    if (!group.current) return
+    group.current.rotation.y = yawFromFacing(facing, CAT_YAW_OFFSET)
+
+    if (moveMode === 'wander' && (action === 'walk' || action === 'trot')) {
+      tRef.current += dt * (action === 'trot' ? 1.1 : 0.6)
+      const [x, z] = figureEight(tRef.current, 1.8)
+      const [cx, cz] = clampToYard(x, z)
+      positionRef.current = [cx, 0, cz]
+      group.current.position.set(cx, 0, cz)
+      return
+    }
+
+    if (moveMode === 'step' && (action === 'walk' || action === 'jump' || action === 'pounce')) {
+      const duration = action === 'walk' ? STEP_DURATION_S : JUMP_DURATION_S
+      elapsedRef.current += dt
+      const t = Math.min(1, elapsedRef.current / duration)
+      const [sx, sy, sz] = startRef.current
+      const [dx, dy, dz] = destRef.current
+      const x = sx + (dx - sx) * t
+      const y = sy + (dy - sy) * t
+      const z = sz + (dz - sz) * t
+      positionRef.current = [x, y, z]
+      group.current.position.set(x, y, z)
+      return
+    }
+
+    const [px, py, pz] = positionRef.current
+    group.current.position.set(px, py, pz)
   })
 
   return (
-    <group
-      ref={group}
-      scale={CAT_SCALE}
-      position={positionRef.current}
-    >
+    <group ref={group} scale={CAT_SCALE} position={positionRef.current}>
       <primitive object={scene} />
     </group>
   )

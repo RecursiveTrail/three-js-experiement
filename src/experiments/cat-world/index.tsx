@@ -15,6 +15,8 @@ export function CatWorldPage() {
         <CatWorld
           action={world.action}
           seq={world.seq}
+          facing={world.facing}
+          moveMode={world.moveMode}
           onActionEnd={world.onActionEnd}
           positionRef={world.positionRef}
         />
