@@ -1,15 +1,17 @@
 import { useFrame } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { APEX_Y } from './constants'
 import { phaseDurationS, type World } from './reduce'
 import type { Group } from 'three'
 
 export function Krishna({ world }: { world: World }) {
   const ref = useRef<Group>(null)
-  const started = useRef(0)
-  useEffect(() => {
+  const started = useRef(performance.now())
+  const lastAnimSeq = useRef(world.animSeq)
+  if (lastAnimSeq.current !== world.animSeq) {
+    lastAnimSeq.current = world.animSeq
     started.current = performance.now()
-  }, [world.animSeq])
+  }
 
   useFrame(() => {
     const g = ref.current

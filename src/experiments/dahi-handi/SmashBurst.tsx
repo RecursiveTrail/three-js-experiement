@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { BREAK_S, POT_Y, SHARD_COUNT } from './constants'
 import type { Group } from 'three'
 
@@ -14,10 +14,12 @@ const OFFSETS: [number, number, number][] = [
 
 export function SmashBurst({ xz, animSeq }: { xz: [number, number]; animSeq: number }) {
   const ref = useRef<Group>(null)
-  const started = useRef(0)
-  useEffect(() => {
+  const started = useRef(performance.now())
+  const lastAnimSeq = useRef(animSeq)
+  if (lastAnimSeq.current !== animSeq) {
+    lastAnimSeq.current = animSeq
     started.current = performance.now()
-  }, [animSeq])
+  }
   useFrame(() => {
     const g = ref.current
     if (!g) return
