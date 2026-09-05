@@ -2,6 +2,7 @@ import { Suspense, useCallback, useRef, useState } from 'react'
 import { ExperienceCanvas } from '../../shared/r3f/ExperienceCanvas'
 import { CatBoundary } from './CatBoundary'
 import { PlaceholderCat, RiggedCat } from './CatActor'
+import { FollowCamera } from './FollowCamera'
 import { Yard } from './Yard'
 import type { LogicalAction } from './actions'
 
@@ -14,6 +15,7 @@ export function CatWorld() {
   )
   return (
     <ExperienceCanvas>
+      <FollowCamera target={positionRef} />
       <Yard />
       <CatBoundary fallback={<PlaceholderCat action={action} onActionEnd={onActionEnd} />}>
         <Suspense fallback={<PlaceholderCat action={action} onActionEnd={onActionEnd} />}>

@@ -1,10 +1,12 @@
 import { useAnimations, useGLTF } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import type { MutableRefObject } from 'react'
 import type { Group } from 'three'
 import { LoopOnce, LoopRepeat } from 'three'
 import type { LogicalAction } from './actions'
 import { bindingFor } from './clipMap'
+import { clampToYard, figureEight } from './idleLife'
 
 export const CAT_SCALE = 0.3
 export const CAT_URL = '/assets/cat-world/cat.glb'
@@ -75,6 +77,16 @@ export function RiggedCat({
     mixer.addEventListener('finished', done)
     return () => mixer.removeEventListener('finished', done)
   }, [action, actions, binding, mixer, onActionEnd])
+
+  const tRef = useRef(0)
+  useFrame((_, dt) => {
+    if (action !== 'walk' && action !== 'trot') return
+    tRef.current += dt * (action === 'trot' ? 1.1 : 0.6)
+    const [x, z] = figureEight(tRef.current, 1.8)
+    const [cx, cz] = clampToYard(x, z)
+    positionRef.current = [cx, 0, cz]
+    if (group.current) group.current.position.set(cx, 0, cz)
+  })
 
   return (
     <group
