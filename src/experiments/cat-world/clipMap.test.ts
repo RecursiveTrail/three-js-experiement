@@ -14,9 +14,18 @@ describe('bindingFor', () => {
     }
   })
 
-  it('maps jump and pounce to Jump_Start one-shots with land', () => {
-    expect(bindingFor('jump')).toMatchObject({ clip: 'Jump_Start', loop: false, sound: 'land' })
-    expect(bindingFor('pounce')).toMatchObject({ clip: 'Jump_Start', loop: false, sound: 'land' })
+  it('maps jump and pounce to Jump_Start one-shots with a cat voice, not land', () => {
+    expect(bindingFor('jump')).toMatchObject({ clip: 'Jump_Start', loop: false, sound: 'chirp' })
+    expect(bindingFor('pounce')).toMatchObject({ clip: 'Jump_Start', loop: false, sound: 'chirp' })
+    expect(bindingFor('jump').sound).not.toBe('land')
+    expect(bindingFor('pounce').sound).not.toBe('land')
+  })
+
+  it('does not play paw on walk or trot', () => {
+    expect(bindingFor('walk').sound).not.toBe('paw')
+    expect(bindingFor('trot').sound).not.toBe('paw')
+    expect(bindingFor('walk').sound).toBeNull()
+    expect(bindingFor('trot').sound).toBeNull()
   })
 
   it('maps meow to Idle plus meow sound', () => {

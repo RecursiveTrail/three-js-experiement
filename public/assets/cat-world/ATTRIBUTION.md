@@ -22,8 +22,6 @@ https://bigsoundbank.com — Joseph Sardin.
 | `audio/meow.mp3` | [Meow Cat #2](https://bigsoundbank.com/meow-cat-2-s1890.html) (#1890) | Real cat meow, ~3s |
 | `audio/chirp.mp3` | [Meow cat #11](https://bigsoundbank.com/meow-cat-11-s1899.html) (#1899) | Short vocal, used as chirp |
 | `audio/purr.mp3` | [Cat Purr](https://bigsoundbank.com/cat-purr-s0436.html) (#0436) | Close purr, ~10s |
-| `audio/paw.mp3` | [Steps in the short grass](https://bigsoundbank.com/steps-in-the-short-grass-s0854.html) (#0854) | Human grass steps; play quiet as paw foley |
-| `audio/land.mp3` | [Steps in the Grass, Slow](https://bigsoundbank.com/steps-in-the-grass-slow-s1253.html) (#1253) | Longer grass bed; trim in code for land |
 
 ## Quaternius (CC0)
 
