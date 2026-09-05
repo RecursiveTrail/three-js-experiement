@@ -1,0 +1,17 @@
+export const POT_SPAN = 2.8
+export const MIN_SEP = 1.6
+export const MAX_TRIES = 12
+export const POT_Y = 2.35
+export const ROPE_Y = 3.0
+export const APEX_OFFSET = 0.7
+export const APEX_Y = POT_Y - APEX_OFFSET
+export const JUMP_S = 0.275
+export const BREAK_S = 0.6
+export const WAIT_S = 2.0
+export const RUN_SPEED = 5
+export const RUN_MIN_S = 0.25
+export const RUN_MAX_S = 0.8
+export const CAMERA_POS: [number, number, number] = [0, 3.8, 8.5]
+export const CAMERA_FOV = 40
+export const LOOK_AT: [number, number, number] = [0, 1.1, 0]
+export const SHARD_COUNT = 6
