@@ -4,12 +4,13 @@ import { useEffect, useRef } from 'react'
 import type { MutableRefObject } from 'react'
 import type { Group } from 'three'
 import { LoopOnce, LoopRepeat } from 'three'
+import { assetUrl } from '../../shared/assetUrl'
 import type { LogicalAction } from './actions'
 import { bindingFor } from './clipMap'
 import { clampToYard, figureEight } from './idleLife'
 
 export const CAT_SCALE = 0.3
-export const CAT_URL = '/assets/cat-world/cat.glb'
+export const CAT_URL = assetUrl('assets/cat-world/cat.glb')
 
 export function PlaceholderCat({
   action,

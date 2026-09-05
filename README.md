@@ -16,6 +16,10 @@ npm run dev
 npm test
 ```
 
+Live site (GitHub Pages): https://RecursiveTrail.github.io/three-js-experiement/
+
+Pushes to `main` build and deploy via `.github/workflows/deploy-pages.yml`. Local `npm run dev` still uses `/`.
+
 ## Cat World
 
 Stylized Quaternius cat in a Polyhaven yard. Keys are a nudge, not a remote. Facts appear after each reaction.

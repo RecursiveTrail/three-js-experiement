@@ -4,7 +4,7 @@ import { CatWorldPage } from '../experiments/cat-world/index'
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<ExperimentList />} />
         <Route path="/cat-world" element={<CatWorldPage />} />

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
+import { assetUrl } from '../../shared/assetUrl'
 import { createAudioPlayer } from '../../shared/audio/player'
 import { subscribeNudges } from '../../shared/input/nudgeBus'
 import type { Nudge } from './actions'
@@ -14,9 +16,10 @@ export function useCatWorld() {
     undefined,
     initialWorld,
   )
+  const location = useLocation()
   const positionRef = useRef<[number, number, number]>([0, 0, 0])
   const player = useMemo(
-    () => createAudioPlayer({ basePath: '/assets/cat-world/audio' }),
+    () => createAudioPlayer({ basePath: assetUrl('assets/cat-world/audio') }),
     [],
   )
 
@@ -31,7 +34,7 @@ export function useCatWorld() {
     const stop = subscribeNudges(
       window,
       (nudge) => dispatch({ type: 'nudge', nudge }),
-      () => document.visibilityState === 'visible' && window.location.pathname === '/cat-world',
+      () => document.visibilityState === 'visible' && location.pathname === '/cat-world',
     )
     const onVis = () => {
       if (document.visibilityState === 'hidden') player.stopAll()
@@ -43,7 +46,7 @@ export function useCatWorld() {
       player.stopAll()
       player.dispose()
     }
-  }, [player])
+  }, [player, location.pathname])
 
   useEffect(() => {
     if (state.action !== 'walk' && state.action !== 'eat') return

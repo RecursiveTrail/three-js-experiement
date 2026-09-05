@@ -1,11 +1,19 @@
 import { Environment, useGLTF, useTexture } from '@react-three/drei'
 import { RepeatWrapping } from 'three'
+import { assetUrl } from '../../shared/assetUrl'
+
+const GRASS_DIFF = assetUrl('assets/cat-world/yard/grass/leafy_grass_diff_1k.jpg')
+const GRASS_NOR = assetUrl('assets/cat-world/yard/grass/leafy_grass_nor_gl_1k.jpg')
+const GRASS_ARM = assetUrl('assets/cat-world/yard/grass/leafy_grass_arm_1k.jpg')
+const POT_URL = assetUrl('assets/cat-world/yard/pot/planter_pot_clay_1k.gltf')
+const BENCH_URL = assetUrl('assets/cat-world/yard/bench/painted_wooden_bench_1k.gltf')
+const HDRI_URL = assetUrl('assets/cat-world/yard/garden.hdr')
 
 export function Yard() {
   const maps = useTexture({
-    map: '/assets/cat-world/yard/grass/leafy_grass_diff_1k.jpg',
-    normalMap: '/assets/cat-world/yard/grass/leafy_grass_nor_gl_1k.jpg',
-    aoMap: '/assets/cat-world/yard/grass/leafy_grass_arm_1k.jpg',
+    map: GRASS_DIFF,
+    normalMap: GRASS_NOR,
+    aoMap: GRASS_ARM,
   })
   maps.map.wrapS = maps.map.wrapT = RepeatWrapping
   maps.normalMap.wrapS = maps.normalMap.wrapT = RepeatWrapping
@@ -14,8 +22,8 @@ export function Yard() {
   maps.normalMap.repeat.set(6, 6)
   maps.aoMap.repeat.set(6, 6)
 
-  const pot = useGLTF('/assets/cat-world/yard/pot/planter_pot_clay_1k.gltf')
-  const bench = useGLTF('/assets/cat-world/yard/bench/painted_wooden_bench_1k.gltf')
+  const pot = useGLTF(POT_URL)
+  const bench = useGLTF(BENCH_URL)
 
   return (
     <>
@@ -28,7 +36,7 @@ export function Yard() {
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
       />
-      <Environment files="/assets/cat-world/yard/garden.hdr" background />
+      <Environment files={HDRI_URL} background />
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[8, 8, 24, 24]} />
         <meshStandardMaterial {...maps} roughness={0.95} />
@@ -39,5 +47,5 @@ export function Yard() {
   )
 }
 
-useGLTF.preload('/assets/cat-world/yard/pot/planter_pot_clay_1k.gltf')
-useGLTF.preload('/assets/cat-world/yard/bench/painted_wooden_bench_1k.gltf')
+useGLTF.preload(POT_URL)
+useGLTF.preload(BENCH_URL)
