@@ -6,8 +6,11 @@ import {
   YARD_HALF,
   clampToYard,
   destinationFor,
+  endTimeoutMs,
   figureEight,
+  shouldEndFromMixer,
   translateClamped,
+  wanderPosition,
   yawFromFacing,
 } from './idleLife'
 
@@ -27,6 +30,49 @@ describe('figureEight', () => {
       expect(Math.abs(x)).toBeLessThanOrEqual(1.8 + 1e-6)
       expect(Math.abs(z)).toBeLessThanOrEqual(1.8 + 1e-6)
     }
+  })
+})
+
+describe('wanderPosition', () => {
+  it('starts from the current position instead of world origin', () => {
+    expect(wanderPosition([0, 0, -1.2], 0, 1.8)).toEqual([0, 0, -1.2])
+  })
+
+  it('clamps the origin-offset curve to the yard', () => {
+    expect(wanderPosition([YARD_HALF, 0, YARD_HALF], Math.PI / 2, 1.8)).toEqual([
+      YARD_HALF,
+      0,
+      YARD_HALF,
+    ])
+  })
+})
+
+describe('endTimeoutMs', () => {
+  it('gives reserved movement ownership to its full-duration timer', () => {
+    expect(endTimeoutMs('walk', 'step')).toBe(800)
+    expect(endTimeoutMs('jump', 'step')).toBe(500)
+  })
+
+  it('keeps ambient walk and eat on the idle-life timer', () => {
+    expect(endTimeoutMs('walk', 'wander')).toBe(4000)
+    expect(endTimeoutMs('eat', 'wander')).toBe(4000)
+  })
+
+  it('does not time unrelated one-shots', () => {
+    expect(endTimeoutMs('jump', 'wander')).toBeNull()
+  })
+})
+
+describe('shouldEndFromMixer', () => {
+  it('only accepts the finished event for the started wander action', () => {
+    const started = {}
+    expect(shouldEndFromMixer('wander', started, started)).toBe(true)
+    expect(shouldEndFromMixer('wander', {}, started)).toBe(false)
+  })
+
+  it('does not end timer-owned step actions', () => {
+    const started = {}
+    expect(shouldEndFromMixer('step', started, started)).toBe(false)
   })
 })
 

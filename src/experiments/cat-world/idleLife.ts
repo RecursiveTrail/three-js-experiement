@@ -10,6 +10,7 @@ export const STEP_DURATION_S = 0.8
 export const STEP_DURATION_MS = 800
 export const JUMP_DISTANCE = 0.5
 export const JUMP_DURATION_S = 0.5
+export const JUMP_DURATION_MS = 500
 
 export function clampToYard(x: number, z: number): [number, number] {
   return [
@@ -20,6 +21,27 @@ export function clampToYard(x: number, z: number): [number, number] {
 
 export function figureEight(tSeconds: number, radius: number): [number, number] {
   return [radius * Math.sin(tSeconds), radius * Math.sin(tSeconds) * Math.cos(tSeconds)]
+}
+
+export function wanderPosition(origin: Vec3, tSeconds: number, radius: number): Vec3 {
+  const [x, z] = figureEight(tSeconds, radius)
+  const [cx, cz] = clampToYard(origin[0] + x, origin[2] + z)
+  return [cx, origin[1], cz]
+}
+
+export function endTimeoutMs(action: LogicalAction, moveMode: MoveMode): number | null {
+  if (action === 'walk' && moveMode === 'step') return STEP_DURATION_MS
+  if (action === 'jump' && moveMode === 'step') return JUMP_DURATION_MS
+  if (action === 'walk' || action === 'eat') return 4000
+  return null
+}
+
+export function shouldEndFromMixer<T>(
+  moveMode: MoveMode,
+  finishedAction: T,
+  startedAction: T,
+): boolean {
+  return moveMode !== 'step' && finishedAction === startedAction
 }
 
 export function translateClamped(position: Vec3, dir: Vec3, distance: number): Vec3 {

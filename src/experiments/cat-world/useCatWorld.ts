@@ -5,7 +5,7 @@ import { createAudioPlayer } from '../../shared/audio/player'
 import { subscribeNudges } from '../../shared/input/nudgeBus'
 import type { Nudge } from './actions'
 import { bindingFor } from './clipMap'
-import { STEP_DURATION_MS } from './idleLife'
+import { endTimeoutMs } from './idleLife'
 import { initialWorld, reduceActionEnd, reduceNudge, type WorldState } from './nudgeReduce'
 
 export function useCatWorld() {
@@ -50,12 +50,7 @@ export function useCatWorld() {
   }, [player, location.pathname])
 
   useEffect(() => {
-    const ms =
-      state.action === 'walk' && state.moveMode === 'step'
-        ? STEP_DURATION_MS
-        : state.action === 'walk' || state.action === 'eat'
-          ? 4000
-          : null
+    const ms = endTimeoutMs(state.action, state.moveMode)
     if (ms === null) return
     const t = window.setTimeout(() => dispatch({ type: 'end' }), ms)
     return () => window.clearTimeout(t)

@@ -8,11 +8,11 @@ import { assetUrl } from '../../shared/assetUrl'
 import type { LogicalAction } from './actions'
 import { bindingFor } from './clipMap'
 import {
-  clampToYard,
   destinationFor,
-  figureEight,
   JUMP_DURATION_S,
+  shouldEndFromMixer,
   STEP_DURATION_S,
+  wanderPosition,
   yawFromFacing,
   type MoveMode,
   type Vec3,
@@ -72,6 +72,7 @@ export function RiggedCat({
   const binding = bindingFor(action)
   const startRef = useRef<Vec3>([0, 0, 0])
   const destRef = useRef<Vec3>([0, 0, 0])
+  const wanderOriginRef = useRef<Vec3>([0, 0, 0])
   const elapsedRef = useRef(0)
   const tRef = useRef(0)
 
@@ -90,16 +91,18 @@ export function RiggedCat({
       onActionEnd()
       return
     }
-    Object.values(actions).forEach((a) => a?.fadeOut(0.15))
+    Object.values(actions).forEach((a) => a?.stop())
     next.reset()
     next.setLoop(binding.loop ? LoopRepeat : LoopOnce, binding.loop ? Infinity : 1)
     next.clampWhenFinished = !binding.loop
     next.fadeIn(0.15).play()
     if (binding.loop) return
-    const done = () => onActionEnd()
+    const done = (event: { action: unknown }) => {
+      if (shouldEndFromMixer(moveMode, event.action, next)) onActionEnd()
+    }
     mixer.addEventListener('finished', done)
     return () => mixer.removeEventListener('finished', done)
-  }, [action, seq, actions, binding, mixer, onActionEnd])
+  }, [action, seq, actions, binding, mixer, moveMode, onActionEnd])
 
   useEffect(() => {
     const from = positionRef.current
@@ -108,16 +111,21 @@ export function RiggedCat({
     elapsedRef.current = 0
   }, [action, seq, facing, moveMode, positionRef])
 
+  useEffect(() => {
+    if (moveMode !== 'wander' || (action !== 'walk' && action !== 'trot')) return
+    wanderOriginRef.current = positionRef.current
+    tRef.current = 0
+  }, [action, seq, moveMode, positionRef])
+
   useFrame((_, dt) => {
     if (!group.current) return
     group.current.rotation.y = yawFromFacing(facing, CAT_YAW_OFFSET)
 
     if (moveMode === 'wander' && (action === 'walk' || action === 'trot')) {
       tRef.current += dt * (action === 'trot' ? 1.1 : 0.6)
-      const [x, z] = figureEight(tRef.current, 1.8)
-      const [cx, cz] = clampToYard(x, z)
-      positionRef.current = [cx, 0, cz]
-      group.current.position.set(cx, 0, cz)
+      const [x, y, z] = wanderPosition(wanderOriginRef.current, tRef.current, 1.8)
+      positionRef.current = [x, y, z]
+      group.current.position.set(x, y, z)
       return
     }
 

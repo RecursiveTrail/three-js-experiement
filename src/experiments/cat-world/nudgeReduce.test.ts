@@ -78,6 +78,13 @@ describe('reduceNudge unreserved keys', () => {
     expect(next.queue.next).toBeNull()
   })
 
+  it('starts an Enter nudge in wander mode after a reserved step', () => {
+    const stepped = reduceNudge(initialWorld(), n('a'), () => 0.2)
+    const jumped = reduceNudge(stepped, n('Enter'), () => 0.2)
+    expect(jumped.action).toBe('jump')
+    expect(jumped.moveMode).toBe('wander')
+  })
+
   it('sets lastKey and a fact', () => {
     const next = reduceNudge(initialWorld(), n(' '), () => 0)
     expect(next.lastKey).toBe(' ')
@@ -102,6 +109,13 @@ describe('reduceActionEnd', () => {
     expect(ended.facing).toEqual([-1, 0, 0])
   })
 
+  it('clears step mode when idle life returns to idle', () => {
+    const stepped = reduceNudge(initialWorld(), n('a'), () => 0.2)
+    const ended = reduceActionEnd(stepped, () => 0.99)
+    expect(ended.action).toBe('idle')
+    expect(ended.moveMode).toBe('wander')
+  })
+
   it('bumps seq when promoting a queued Enter jump', () => {
     const first = reduceNudge(initialWorld(), n('Enter'), () => 0.2)
     const second = reduceNudge(first, n('Enter'), () => 0.2)
@@ -109,5 +123,19 @@ describe('reduceActionEnd', () => {
     const ended = reduceActionEnd(second, () => 0.2)
     expect(ended.action).toBe('jump')
     expect(ended.seq).toBeGreaterThan(second.seq)
+  })
+
+  it('promotes queued nudges in wander mode', () => {
+    const ended = reduceActionEnd(
+      {
+        ...initialWorld(),
+        action: 'jump',
+        moveMode: 'step',
+        queue: { current: 'jump', next: 'jump' },
+      },
+      () => 0.2,
+    )
+    expect(ended.action).toBe('jump')
+    expect(ended.moveMode).toBe('wander')
   })
 })

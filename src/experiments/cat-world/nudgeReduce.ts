@@ -65,8 +65,6 @@ export function reduceNudge(state: WorldState, nudge: Nudge, rng: Rng): WorldSta
 
   const picked = pickReaction({ ...nudge, family: cmd.family }, rng)
   const fact = factFor(picked, rng)
-  const wanderIfMove: MoveMode =
-    picked === 'walk' || picked === 'trot' ? 'wander' : state.moveMode
 
   if (state.queue.current === null || INTERRUPTIBLE.has(state.action)) {
     return {
@@ -76,7 +74,7 @@ export function reduceNudge(state: WorldState, nudge: Nudge, rng: Rng): WorldSta
       fact,
       seq: state.seq + 1,
       facing: state.facing,
-      moveMode: wanderIfMove,
+      moveMode: 'wander',
     }
   }
 
@@ -87,12 +85,15 @@ export function reduceNudge(state: WorldState, nudge: Nudge, rng: Rng): WorldSta
 export function reduceActionEnd(state: WorldState, rng: Rng): WorldState {
   const queue = advanceQueue(state.queue)
   if (queue.current) {
-    const moveMode: MoveMode =
-      queue.current === 'walk' || queue.current === 'trot' ? 'wander' : state.moveMode
-    return { ...state, queue, action: queue.current, moveMode, seq: state.seq + 1 }
+    return { ...state, queue, action: queue.current, moveMode: 'wander', seq: state.seq + 1 }
   }
   const r = rng()
   const action: LogicalAction = r < 0.1 ? 'walk' : r < 0.3 ? 'eat' : 'idle'
-  const moveMode: MoveMode = action === 'walk' ? 'wander' : state.moveMode
-  return { ...state, queue: { current: action, next: null }, action, moveMode, seq: state.seq + 1 }
+  return {
+    ...state,
+    queue: { current: action, next: null },
+    action,
+    moveMode: 'wander',
+    seq: state.seq + 1,
+  }
 }
