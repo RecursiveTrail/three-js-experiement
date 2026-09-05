@@ -33,7 +33,7 @@ export function SmashBurst({ xz, animSeq }: { xz: [number, number]; animSeq: num
       {OFFSETS.slice(0, SHARD_COUNT).map((o, i) => (
         <mesh key={i} position={o} castShadow>
           <boxGeometry args={[0.07, 0.05, 0.06]} />
-          <meshStandardMaterial color="#c4713b" />
+          <meshStandardMaterial color="#e24d12" roughness={0.42} />
         </mesh>
       ))}
     </group>

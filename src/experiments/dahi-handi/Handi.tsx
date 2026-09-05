@@ -17,11 +17,11 @@ export function Handi({ xz }: { xz: [number, number] }) {
       <group ref={ref} position={[0, POT_Y, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[0.18, 16, 16]} />
-          <meshStandardMaterial color="#c4713b" roughness={0.7} />
+          <meshStandardMaterial color="#e24d12" roughness={0.42} metalness={0.05} />
         </mesh>
         <mesh position={[0, 0.16, 0]}>
           <cylinderGeometry args={[0.07, 0.09, 0.1, 12]} />
-          <meshStandardMaterial color="#b56534" />
+          <meshStandardMaterial color="#c43d0c" roughness={0.45} />
         </mesh>
       </group>
     </group>
