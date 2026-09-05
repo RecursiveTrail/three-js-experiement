@@ -1,25 +1,28 @@
-import { Suspense, useCallback, useRef, useState } from 'react'
+import { Suspense } from 'react'
+import type { MutableRefObject } from 'react'
 import { ExperienceCanvas } from '../../shared/r3f/ExperienceCanvas'
-import { CatBoundary } from './CatBoundary'
+import type { LogicalAction } from './actions'
 import { PlaceholderCat, RiggedCat } from './CatActor'
+import { CatBoundary } from './CatBoundary'
 import { FollowCamera } from './FollowCamera'
 import { Yard } from './Yard'
-import type { LogicalAction } from './actions'
 
-export function CatWorld() {
-  const [action, setAction] = useState<LogicalAction>('idle')
-  const positionRef = useRef<[number, number, number]>([0, 0, 0])
-  const onActionEnd = useCallback(() => setAction('idle'), [])
-  const cat = (
-    <RiggedCat action={action} onActionEnd={onActionEnd} positionRef={positionRef} />
-  )
+export function CatWorld({
+  action,
+  onActionEnd,
+  positionRef,
+}: {
+  action: LogicalAction
+  onActionEnd: () => void
+  positionRef: MutableRefObject<[number, number, number]>
+}) {
   return (
     <ExperienceCanvas>
-      <FollowCamera target={positionRef} />
       <Yard />
+      <FollowCamera target={positionRef} />
       <CatBoundary fallback={<PlaceholderCat action={action} onActionEnd={onActionEnd} />}>
         <Suspense fallback={<PlaceholderCat action={action} onActionEnd={onActionEnd} />}>
-          {cat}
+          <RiggedCat action={action} onActionEnd={onActionEnd} positionRef={positionRef} />
         </Suspense>
       </CatBoundary>
     </ExperienceCanvas>
