@@ -1,4 +1,15 @@
+import type { LogicalAction } from './actions'
+
+export type Vec3 = [number, number, number]
+export type MoveMode = 'step' | 'wander'
+
 export const YARD_HALF = 3.4
+export const DEFAULT_FACING: Vec3 = [0, 0, -1]
+export const STEP_DISTANCE = 1.2
+export const STEP_DURATION_S = 0.8
+export const STEP_DURATION_MS = 800
+export const JUMP_DISTANCE = 0.5
+export const JUMP_DURATION_S = 0.5
 
 export function clampToYard(x: number, z: number): [number, number] {
   return [
@@ -9,4 +20,25 @@ export function clampToYard(x: number, z: number): [number, number] {
 
 export function figureEight(tSeconds: number, radius: number): [number, number] {
   return [radius * Math.sin(tSeconds), radius * Math.sin(tSeconds) * Math.cos(tSeconds)]
+}
+
+export function translateClamped(position: Vec3, dir: Vec3, distance: number): Vec3 {
+  const [cx, cz] = clampToYard(position[0] + dir[0] * distance, position[2] + dir[2] * distance)
+  return [cx, position[1], cz]
+}
+
+export function destinationFor(
+  action: LogicalAction,
+  moveMode: MoveMode,
+  facing: Vec3,
+  from: Vec3,
+): Vec3 {
+  if (moveMode !== 'step') return from
+  if (action === 'walk') return translateClamped(from, facing, STEP_DISTANCE)
+  if (action === 'jump' || action === 'pounce') return translateClamped(from, facing, JUMP_DISTANCE)
+  return from
+}
+
+export function yawFromFacing(facing: Vec3, offset = 0): number {
+  return Math.atan2(facing[0], facing[2]) + offset
 }
