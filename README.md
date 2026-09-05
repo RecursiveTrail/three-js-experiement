@@ -11,6 +11,7 @@ npm run dev
 
 - `/` — experiment list
 - `/cat-world` — backyard cat. Mash the keyboard.
+- `/dahi-handi` — little Krishna smashes hanging dahi handis.
 
 ```bash
 npm test
@@ -32,3 +33,17 @@ Stylized Quaternius cat in a Polyhaven yard.
 Assets live under `public/assets/cat-world`.
 
 Assets and licenses: `public/assets/cat-world/ATTRIBUTION.md`.
+
+## Dahi Handi
+
+Stylized mesh Krishna in a dollhouse room.
+
+- Space or click: run under the pot, jump, always smash.
+- Crack + clap on smash, then ~2 s of empty ceiling, then a new pot elsewhere.
+- Count stays on screen.
+
+Assets: `public/assets/dahi-handi`. Licenses: `public/assets/dahi-handi/ATTRIBUTION.md`.
+
+## Roadmap
+
+Next experiments (shader pond → particles → glass → Rapier → scroll): [docs/roadmap](docs/roadmap/README.md).
