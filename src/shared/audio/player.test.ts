@@ -43,6 +43,26 @@ describe('createAudioPlayer', () => {
     player.dispose()
   })
 
+  it('does not start a voice after stopAll during fetch', async () => {
+    const { ctx, started } = mockContext()
+    let resolveFetch!: (value: Response) => void
+    const fetchPromise = new Promise<Response>((resolve) => {
+      resolveFetch = resolve
+    })
+    const player = createAudioPlayer({
+      basePath: '/assets/cat-world/audio',
+      context: ctx,
+      fetchImpl: (async () => fetchPromise) as typeof fetch,
+      decode: async () => ({ duration: 1 }) as AudioBuffer,
+    })
+    const playPromise = player.play('meow')
+    player.stopAll()
+    resolveFetch(new Response(new ArrayBuffer(8)))
+    await playPromise
+    expect(started).toHaveLength(0)
+    player.dispose()
+  })
+
   it('resolves when the file is missing', async () => {
     const { ctx } = mockContext()
     const player = createAudioPlayer({

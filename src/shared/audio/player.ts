@@ -17,6 +17,7 @@ export function createAudioPlayer(opts: {
   const fetchImpl = opts.fetchImpl ?? fetch
   let ctx = opts.context
   let current: Source | null = null
+  let generation = 0
   const cache = new Map<SoundName, AudioBuffer>()
 
   function ensureCtx(): AudioContext {
@@ -25,6 +26,7 @@ export function createAudioPlayer(opts: {
   }
 
   function stopAll() {
+    generation++
     try {
       current?.stop()
     } catch {
@@ -35,17 +37,21 @@ export function createAudioPlayer(opts: {
   }
 
   async function play(name: SoundName, playOpts?: { gain?: number }): Promise<void> {
+    const playGen = generation
     try {
       const audio = ensureCtx()
       if (audio.state === 'suspended') await audio.resume()
       let buffer = cache.get(name)
       if (!buffer) {
         const res = await fetchImpl(`${opts.basePath}/${name}.mp3`)
+        if (playGen !== generation) return
         if (!res.ok) return
         const raw = await res.arrayBuffer()
         buffer = opts.decode ? await opts.decode(audio, raw) : await audio.decodeAudioData(raw)
+        if (playGen !== generation) return
         cache.set(name, buffer)
       }
+      if (playGen !== generation) return
       stopAll()
       const src = audio.createBufferSource()
       const gain = audio.createGain()
