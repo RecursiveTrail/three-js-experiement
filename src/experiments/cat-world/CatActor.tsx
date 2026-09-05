@@ -10,6 +10,7 @@ import { bindingFor } from './clipMap'
 import {
   destinationFor,
   JUMP_DURATION_S,
+  settledStepPosition,
   shouldEndFromMixer,
   STEP_DURATION_S,
   wanderPosition,
@@ -109,6 +110,13 @@ export function RiggedCat({
     startRef.current = from
     destRef.current = destinationFor(action, moveMode, facing, from)
     elapsedRef.current = 0
+    return () => {
+      if (moveMode === 'step') {
+        const [dx, dy, dz] = destRef.current
+        positionRef.current = [dx, dy, dz]
+        group.current?.position.set(dx, dy, dz)
+      }
+    }
   }, [action, seq, facing, moveMode, positionRef])
 
   useEffect(() => {
@@ -132,12 +140,12 @@ export function RiggedCat({
     if (moveMode === 'step' && (action === 'walk' || action === 'jump' || action === 'pounce')) {
       const duration = action === 'walk' ? STEP_DURATION_S : JUMP_DURATION_S
       elapsedRef.current += dt
-      const t = Math.min(1, elapsedRef.current / duration)
-      const [sx, sy, sz] = startRef.current
-      const [dx, dy, dz] = destRef.current
-      const x = sx + (dx - sx) * t
-      const y = sy + (dy - sy) * t
-      const z = sz + (dz - sz) * t
+      const [x, y, z] = settledStepPosition(
+        startRef.current,
+        destRef.current,
+        elapsedRef.current,
+        duration,
+      )
       positionRef.current = [x, y, z]
       group.current.position.set(x, y, z)
       return

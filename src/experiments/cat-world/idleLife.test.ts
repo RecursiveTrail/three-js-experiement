@@ -8,6 +8,7 @@ import {
   destinationFor,
   endTimeoutMs,
   figureEight,
+  settledStepPosition,
   shouldEndFromMixer,
   translateClamped,
   wanderPosition,
@@ -103,6 +104,22 @@ describe('destinationFor', () => {
 
   it('does not translate wander walks', () => {
     expect(destinationFor('walk', 'wander', [1, 0, 0], [0.4, 0, 0.2])).toEqual([0.4, 0, 0.2])
+  })
+})
+
+describe('settledStepPosition', () => {
+  const start: [number, number, number] = [0, 0, 0]
+  const dest: [number, number, number] = [0, 0, -0.5]
+  const duration = 0.5
+
+  it('returns dest exactly when elapsed reaches duration', () => {
+    expect(settledStepPosition(start, dest, 0.5, duration)).toEqual(dest)
+  })
+
+  it('stays short of dest just before duration ends', () => {
+    const pos = settledStepPosition(start, dest, 0.49, duration)
+    expect(pos[2]).toBeGreaterThan(dest[2])
+    expect(pos[2]).toBeCloseTo(-0.49, 5)
   })
 })
 

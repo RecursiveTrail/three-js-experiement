@@ -61,6 +61,21 @@ export function destinationFor(
   return from
 }
 
+export function settledStepPosition(
+  start: Vec3,
+  dest: Vec3,
+  elapsed: number,
+  duration: number,
+): Vec3 {
+  if (elapsed >= duration) return dest
+  const t = elapsed / duration
+  return [
+    start[0] + (dest[0] - start[0]) * t,
+    start[1] + (dest[1] - start[1]) * t,
+    start[2] + (dest[2] - start[2]) * t,
+  ]
+}
+
 export function yawFromFacing(facing: Vec3, offset = 0): number {
   return Math.atan2(facing[0], facing[2]) + offset
 }
