@@ -10,6 +10,7 @@ import {
   figureEight,
   settledStepPosition,
   shouldEndFromMixer,
+  shouldSettlePreviousStep,
   translateClamped,
   wanderPosition,
   yawFromFacing,
@@ -104,6 +105,20 @@ describe('destinationFor', () => {
 
   it('does not translate wander walks', () => {
     expect(destinationFor('walk', 'wander', [1, 0, 0], [0.4, 0, 0.2])).toEqual([0.4, 0, 0.2])
+  })
+})
+
+describe('shouldSettlePreviousStep', () => {
+  it('returns false when there is no previous step', () => {
+    expect(shouldSettlePreviousStep(null, 1)).toBe(false)
+  })
+
+  it('returns false for Strict Mode replay of the same step', () => {
+    expect(shouldSettlePreviousStep(3, 3)).toBe(false)
+  })
+
+  it('returns true when the action sequence advances', () => {
+    expect(shouldSettlePreviousStep(3, 4)).toBe(true)
   })
 })
 

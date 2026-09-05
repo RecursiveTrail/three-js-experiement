@@ -12,6 +12,7 @@ import {
   JUMP_DURATION_S,
   settledStepPosition,
   shouldEndFromMixer,
+  shouldSettlePreviousStep,
   STEP_DURATION_S,
   wanderPosition,
   yawFromFacing,
@@ -76,6 +77,7 @@ export function RiggedCat({
   const wanderOriginRef = useRef<Vec3>([0, 0, 0])
   const elapsedRef = useRef(0)
   const tRef = useRef(0)
+  const completedStepRef = useRef<{ seq: number; dest: Vec3 } | null>(null)
 
   useEffect(() => {
     scene.traverse((o) => {
@@ -106,16 +108,22 @@ export function RiggedCat({
   }, [action, seq, actions, binding, mixer, moveMode, onActionEnd])
 
   useEffect(() => {
+    const prev = completedStepRef.current
+    if (prev && shouldSettlePreviousStep(prev.seq, seq)) {
+      const [dx, dy, dz] = prev.dest
+      positionRef.current = [dx, dy, dz]
+      group.current?.position.set(dx, dy, dz)
+    }
+
     const from = positionRef.current
     startRef.current = from
     destRef.current = destinationFor(action, moveMode, facing, from)
     elapsedRef.current = 0
-    return () => {
-      if (moveMode === 'step') {
-        const [dx, dy, dz] = destRef.current
-        positionRef.current = [dx, dy, dz]
-        group.current?.position.set(dx, dy, dz)
-      }
+
+    if (moveMode === 'step') {
+      completedStepRef.current = { seq, dest: destRef.current }
+    } else {
+      completedStepRef.current = null
     }
   }, [action, seq, facing, moveMode, positionRef])
 

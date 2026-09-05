@@ -76,6 +76,10 @@ export function settledStepPosition(
   ]
 }
 
+export function shouldSettlePreviousStep(prevSeq: number | null, nextSeq: number): boolean {
+  return prevSeq !== null && prevSeq !== nextSeq
+}
+
 export function yawFromFacing(facing: Vec3, offset = 0): number {
   return Math.atan2(facing[0], facing[2]) + offset
 }
