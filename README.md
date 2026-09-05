@@ -16,7 +16,7 @@ npm run dev
 npm test
 ```
 
-Live site (GitHub Pages): https://RecursiveTrail.github.io/three-js-experiement/
+Live site: https://recursivetrail.com/three-js-experiement/
 
 Pushes to `main` build and deploy via `.github/workflows/deploy-pages.yml`. Local `npm run dev` still uses `/`.
 
