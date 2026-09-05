@@ -12,4 +12,10 @@ export const experiments: readonly Experiment[] = [
     path: '/cat-world',
     description: 'A backyard cat that reacts when you mash the keyboard.',
   },
+  {
+    id: 'dahi-handi',
+    title: 'Dahi Handi',
+    path: '/dahi-handi',
+    description: 'Little Krishna jumps to smash hanging dahi handis.',
+  },
 ]
