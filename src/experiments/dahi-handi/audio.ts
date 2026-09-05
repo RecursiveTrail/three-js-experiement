@@ -4,6 +4,7 @@ type Source = { stop: () => void; disconnect: () => void }
 
 export type SmashPlayer = {
   playSmash(): Promise<void>
+  unlock(): Promise<void>
   stopAll(): void
   dispose(): void
 }
@@ -76,6 +77,14 @@ export function createSmashPlayer(opts: {
     async playSmash() {
       const playGen = generation
       await Promise.all(NAMES.map((name) => playOne(name, playGen)))
+    },
+    async unlock() {
+      try {
+        const audio = ensureCtx()
+        if (audio.state === 'suspended') await audio.resume()
+      } catch {
+        // TV / Safari may still block until a later gesture
+      }
     },
     stopAll,
     dispose() {

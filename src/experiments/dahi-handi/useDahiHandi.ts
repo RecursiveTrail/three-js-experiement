@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { assetUrl } from '../../shared/assetUrl'
 import { createSmashPlayer } from './audio'
 import { initialWorld, phaseDurationS, reduce, type WorldEvent } from './reduce'
-import { subscribeSmashInput } from './smashInput'
+import { prefersTvRemote, subscribeSmashInput } from './smashInput'
 
 export function useDahiHandi() {
   const [world, dispatch] = useReducer(
@@ -36,9 +36,13 @@ export function useDahiHandi() {
     const stop = subscribeSmashInput(
       window,
       root,
-      () => dispatch({ type: 'jump' }),
+      () => {
+        void player.unlock()
+        dispatch({ type: 'jump' })
+      },
       () => document.visibilityState === 'visible' && location.pathname === '/dahi-handi',
     )
+    if (prefersTvRemote()) root.focus({ preventScroll: true })
     const onVis = () => {
       if (document.visibilityState === 'hidden') player.stopAll()
     }

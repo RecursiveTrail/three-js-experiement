@@ -6,7 +6,17 @@ import { useDahiHandi } from './useDahiHandi'
 export function DahiHandiPage() {
   const { world, rootRef } = useDahiHandi()
   return (
-    <div ref={rootRef} style={{ height: '100vh', width: '100vw', overflow: 'hidden', position: 'relative' }}>
+    <div
+      ref={rootRef}
+      tabIndex={-1}
+      style={{
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        position: 'relative',
+        outline: 'none',
+      }}
+    >
       <DahiBoundary
         fallback={<div style={{ padding: 24, color: '#f4e6c1' }}>The room could not load. Try refresh.</div>}
       >
