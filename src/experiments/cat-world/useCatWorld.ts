@@ -25,7 +25,7 @@ export function useCatWorld() {
     if (binding.sound && state.action !== 'ignore' && state.action !== 'idle') {
       void player.play(binding.sound, { gain: binding.soundGain })
     }
-  }, [state.action, player])
+  }, [state.action, state.seq, player])
 
   useEffect(() => {
     const stop = subscribeNudges(
@@ -49,12 +49,19 @@ export function useCatWorld() {
     if (state.action !== 'walk' && state.action !== 'eat') return
     const t = window.setTimeout(() => dispatch({ type: 'end' }), 4000)
     return () => window.clearTimeout(t)
-  }, [state.action])
+  }, [state.action, state.seq])
+
+  useEffect(() => {
+    if (state.action !== 'idle' || state.queue.next !== null) return
+    const t = window.setTimeout(() => dispatch({ type: 'end' }), 8000)
+    return () => window.clearTimeout(t)
+  }, [state.action, state.queue.next, state.seq])
 
   const onActionEnd = useCallback(() => dispatch({ type: 'end' }), [])
 
   return {
     action: state.action,
+    seq: state.seq,
     lastKey: state.lastKey,
     fact: state.fact,
     positionRef,

@@ -32,4 +32,15 @@ describe('reduceActionEnd', () => {
     const s = reduceActionEnd(initialWorld(), () => 0.99)
     expect(['idle', 'eat', 'walk']).toContain(s.action)
   })
+
+  it('bumps seq when the same one-shot is re-applied', () => {
+    const first = reduceNudge(initialWorld(), n(' '), () => 0.2)
+    expect(first.action).toBe('jump')
+    const second = reduceNudge(first, n(' '), () => 0.2)
+    expect(second.action).toBe('jump')
+    expect(second.seq > first.seq || second.queue.next === 'jump').toBe(true)
+    const ended = reduceActionEnd(second, () => 0.2)
+    expect(ended.action).toBe('jump')
+    expect(ended.seq).toBeGreaterThan(second.seq)
+  })
 })

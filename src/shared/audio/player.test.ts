@@ -73,4 +73,57 @@ describe('createAudioPlayer', () => {
     await expect(player.play('meow')).resolves.toBeUndefined()
     player.dispose()
   })
+
+  it('does not close an injected AudioContext on dispose', async () => {
+    const { ctx } = mockContext()
+    const close = vi.fn(async () => {})
+    ;(ctx as unknown as { close: () => Promise<void> }).close = close
+    const player = createAudioPlayer({
+      basePath: '/assets/cat-world/audio',
+      context: ctx,
+      fetchImpl: (async () => new Response(new ArrayBuffer(8))) as typeof fetch,
+      decode: async () => ({ duration: 1 }) as AudioBuffer,
+    })
+    await player.play('meow')
+    player.dispose()
+    expect(close).not.toHaveBeenCalled()
+  })
+
+  it('closes a player-created AudioContext on dispose', async () => {
+    const close = vi.fn(async () => {})
+    const Original = globalThis.AudioContext
+    class FakeAudioContext {
+      state = 'running'
+      destination = {}
+      close = close
+      resume = vi.fn(async () => {})
+      decodeAudioData = vi.fn(async () => ({ duration: 1 }))
+      createBufferSource() {
+        return {
+          buffer: null,
+          connect: vi.fn(),
+          start: vi.fn(),
+          stop: vi.fn(),
+          disconnect: vi.fn(),
+          onended: null,
+        }
+      }
+      createGain() {
+        return { gain: { value: 1 }, connect: vi.fn() }
+      }
+    }
+    globalThis.AudioContext = FakeAudioContext as unknown as typeof AudioContext
+    try {
+      const player = createAudioPlayer({
+        basePath: '/assets/cat-world/audio',
+        fetchImpl: (async () => new Response(new ArrayBuffer(8))) as typeof fetch,
+        decode: async () => ({ duration: 1 }) as AudioBuffer,
+      })
+      await player.play('meow')
+      player.dispose()
+      expect(close).toHaveBeenCalledTimes(1)
+    } finally {
+      globalThis.AudioContext = Original
+    }
+  })
 })

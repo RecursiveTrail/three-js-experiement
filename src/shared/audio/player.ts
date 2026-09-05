@@ -15,6 +15,7 @@ export function createAudioPlayer(opts: {
   context?: AudioContext
 }): AudioPlayer {
   const fetchImpl = opts.fetchImpl ?? fetch
+  const ownsContext = opts.context === undefined
   let ctx = opts.context
   let current: Source | null = null
   let generation = 0
@@ -75,6 +76,10 @@ export function createAudioPlayer(opts: {
     dispose() {
       stopAll()
       cache.clear()
+      if (ownsContext && ctx) {
+        void ctx.close()
+        ctx = undefined
+      }
     },
   }
 }

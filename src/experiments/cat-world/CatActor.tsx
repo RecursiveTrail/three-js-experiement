@@ -12,6 +12,7 @@ export const CAT_SCALE = 0.3
 export const CAT_URL = '/assets/cat-world/cat.glb'
 
 export function PlaceholderCat({
+  action,
   onActionEnd,
 }: {
   action: LogicalAction
@@ -20,7 +21,7 @@ export function PlaceholderCat({
   useEffect(() => {
     const t = window.setTimeout(onActionEnd, 800)
     return () => window.clearTimeout(t)
-  }, [onActionEnd])
+  }, [action, onActionEnd])
   return (
     <group>
       <mesh castShadow position={[0, 0.18, 0]}>
@@ -41,10 +42,12 @@ export function PlaceholderCat({
 
 export function RiggedCat({
   action,
+  seq,
   onActionEnd,
   positionRef,
 }: {
   action: LogicalAction
+  seq: number
   onActionEnd: () => void
   positionRef: MutableRefObject<[number, number, number]>
 }) {
@@ -76,7 +79,7 @@ export function RiggedCat({
     const done = () => onActionEnd()
     mixer.addEventListener('finished', done)
     return () => mixer.removeEventListener('finished', done)
-  }, [action, actions, binding, mixer, onActionEnd])
+  }, [action, seq, actions, binding, mixer, onActionEnd])
 
   const tRef = useRef(0)
   useFrame((_, dt) => {

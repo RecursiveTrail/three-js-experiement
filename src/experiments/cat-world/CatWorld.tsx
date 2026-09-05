@@ -9,10 +9,12 @@ import { Yard } from './Yard'
 
 export function CatWorld({
   action,
+  seq,
   onActionEnd,
   positionRef,
 }: {
   action: LogicalAction
+  seq: number
   onActionEnd: () => void
   positionRef: MutableRefObject<[number, number, number]>
 }) {
@@ -22,7 +24,7 @@ export function CatWorld({
       <FollowCamera target={positionRef} />
       <CatBoundary fallback={<PlaceholderCat action={action} onActionEnd={onActionEnd} />}>
         <Suspense fallback={<PlaceholderCat action={action} onActionEnd={onActionEnd} />}>
-          <RiggedCat action={action} onActionEnd={onActionEnd} positionRef={positionRef} />
+          <RiggedCat action={action} seq={seq} onActionEnd={onActionEnd} positionRef={positionRef} />
         </Suspense>
       </CatBoundary>
     </ExperienceCanvas>
