@@ -2,17 +2,69 @@ import { describe, expect, it } from 'vitest'
 import { initialWorld, reduceActionEnd, reduceNudge } from './nudgeReduce'
 import type { Nudge } from './actions'
 
-const n = (key: string): Nudge => ({ key, family: 'jump', at: 0 })
+const n = (key: string): Nudge => ({ key, family: 'wild', at: 0 })
 
-describe('reduceNudge', () => {
-  it('sets lastKey and a fact', () => {
+describe('reduceNudge reserved keys', () => {
+  it('makes A a left step, never a voice pick', () => {
+    const next = reduceNudge(initialWorld(), n('a'), () => 0)
+    expect(next.action).toBe('walk')
+    expect(next.facing).toEqual([-1, 0, 0])
+    expect(next.moveMode).toBe('step')
+    expect(next.queue.next).toBeNull()
+  })
+
+  it('makes Space a sure jump and keeps default facing', () => {
     const next = reduceNudge(initialWorld(), n(' '), () => 0)
-    expect(next.lastKey).toBe(' ')
-    expect(next.fact && next.fact.length > 8).toBe(true)
+    expect(next.action).toBe('jump')
+    expect(next.moveMode).toBe('step')
+    expect(next.facing).toEqual([0, 0, -1])
+  })
+
+  it('never ignores WASD', () => {
+    for (const key of ['w', 'a', 's', 'd']) {
+      const next = reduceNudge(initialWorld(), n(key), () => 0)
+      expect(next.action).toBe('walk')
+      expect(next.moveMode).toBe('step')
+    }
+  })
+
+  it('interrupts a playing one-shot so a reserved key is reliable', () => {
+    const jumping = reduceNudge(initialWorld(), n(' '), () => 0.2)
+    expect(jumping.action).toBe('jump')
+    const stepped = reduceNudge(jumping, n('d'), () => 0.2)
+    expect(stepped.action).toBe('walk')
+    expect(stepped.facing).toEqual([1, 0, 0])
+    expect(stepped.queue).toEqual({ current: 'walk', next: null })
+    expect(stepped.seq).toBeGreaterThan(jumping.seq)
+  })
+
+  it('keeps queue length 1; latest reserved next wins by interrupting', () => {
+    const first = reduceNudge(initialWorld(), n('w'), () => 0.2)
+    const second = reduceNudge(first, n('s'), () => 0.2)
+    expect(second.queue.current).toBe('walk')
+    expect(second.queue.next).toBeNull()
+    expect(second.facing).toEqual([0, 0, 1])
+  })
+})
+
+describe('reduceNudge unreserved keys', () => {
+  it('still ignores on the 15% roll', () => {
+    const next = reduceNudge(initialWorld(), n('e'), () => 0)
+    expect(next.action).toBe('ignore')
+  })
+
+  it('does not steal facing when a nudge walk starts', () => {
+    const stepped = reduceNudge(initialWorld(), n('d'), () => 0.2)
+    const ended = reduceActionEnd(stepped, () => 0.99)
+    const nudged = reduceNudge(ended, n('f'), () => 0.2)
+    if (nudged.action === 'walk' || nudged.action === 'trot') {
+      expect(nudged.moveMode).toBe('wander')
+    }
+    expect(nudged.facing).toEqual([1, 0, 0])
   })
 
   it('queues a second nudge during a one-shot without dropping current', () => {
-    const first = reduceNudge(initialWorld(), n(' '), () => 0.2)
+    const first = reduceNudge(initialWorld(), n('Enter'), () => 0.2)
     expect(first.action).toBe('jump')
     const second = reduceNudge(first, n('Enter'), () => 0.2)
     expect(second.action).toBe('jump')
@@ -21,9 +73,15 @@ describe('reduceNudge', () => {
   })
 
   it('interrupts looping idle immediately', () => {
-    const next = reduceNudge(initialWorld(), n(' '), () => 0.2)
+    const next = reduceNudge(initialWorld(), n('Enter'), () => 0.2)
     expect(next.action).toBe('jump')
     expect(next.queue.next).toBeNull()
+  })
+
+  it('sets lastKey and a fact', () => {
+    const next = reduceNudge(initialWorld(), n(' '), () => 0)
+    expect(next.lastKey).toBe(' ')
+    expect(next.fact && next.fact.length > 8).toBe(true)
   })
 })
 
@@ -33,12 +91,21 @@ describe('reduceActionEnd', () => {
     expect(['idle', 'eat', 'walk']).toContain(s.action)
   })
 
-  it('bumps seq when the same one-shot is re-applied', () => {
-    const first = reduceNudge(initialWorld(), n(' '), () => 0.2)
-    expect(first.action).toBe('jump')
-    const second = reduceNudge(first, n(' '), () => 0.2)
-    expect(second.action).toBe('jump')
-    expect(second.seq > first.seq || second.queue.next === 'jump').toBe(true)
+  it('uses wander for idle-life walk and keeps last reserved facing', () => {
+    const stepped = reduceNudge(initialWorld(), n('a'), () => 0.2)
+    const ended = reduceActionEnd(
+      { ...stepped, queue: { current: stepped.action, next: null } },
+      () => 0.05,
+    )
+    expect(ended.action).toBe('walk')
+    expect(ended.moveMode).toBe('wander')
+    expect(ended.facing).toEqual([-1, 0, 0])
+  })
+
+  it('bumps seq when promoting a queued Enter jump', () => {
+    const first = reduceNudge(initialWorld(), n('Enter'), () => 0.2)
+    const second = reduceNudge(first, n('Enter'), () => 0.2)
+    expect(second.queue.next).toBe('jump')
     const ended = reduceActionEnd(second, () => 0.2)
     expect(ended.action).toBe('jump')
     expect(ended.seq).toBeGreaterThan(second.seq)
