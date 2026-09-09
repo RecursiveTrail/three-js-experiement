@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SPEED } from './constants'
-import { initialSnapshot, reduce, type Snapshot } from './reduce'
+import { initialSnapshot, reduce, type Modak, type Snapshot } from './reduce'
 
 function seqRng(values: number[]) {
   let i = 0
@@ -16,7 +16,7 @@ function playing(extra: Partial<Snapshot> = {}): Snapshot {
 describe('tick motion and hunger', () => {
   it('adds 10 m/s to distance', () => {
     const next = reduce(playing(), { type: 'tick', dt: 0.5 }, quiet)
-    expect(next.distance).toBeCloseTo(5)
+    expect(next.distance).toBeCloseTo(SPEED * 0.5)
   })
 
   it('drains 0.10/s with no gates', () => {
@@ -101,7 +101,7 @@ describe('collect', () => {
   })
 
   it('ignores a high modak unless jumpT is near apex', () => {
-    const m = { id: 1, kind: 'talniche' as const, lane: 0, high: true, atDistance: 10 }
+    const m: Modak = { id: 1, kind: 'talniche', lane: 0, high: true, atDistance: 10 }
     const grounded = reduce(playing({ distance: 10, jumpT: null, modaks: [m] }), { type: 'tick', dt: 0 }, quiet)
     expect(grounded.modaks.some((x) => x.id === 1)).toBe(true)
     const early = reduce(playing({ distance: 10, jumpT: 0.2, modaks: [m] }), { type: 'tick', dt: 0 }, quiet)
