@@ -16,7 +16,7 @@ export function MushikaRunPage() {
         position: 'relative',
         outline: 'none',
         touchAction: 'none',
-        background: '#14080e',
+        background: '#6b303c',
       }}
     >
       <MushikaBoundary

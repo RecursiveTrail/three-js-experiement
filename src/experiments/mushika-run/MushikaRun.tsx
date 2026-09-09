@@ -42,6 +42,7 @@ function Tick({ onTick }: { onTick: (dt: number) => void }) {
 export function MushikaRun({ world, onTick }: { world: Snapshot; onTick: (dt: number) => void }) {
   return (
     <ExperienceCanvas camera={{ position: CAMERA_POS, fov: CAMERA_FOV }} dpr={DPR}>
+      <color attach="background" args={['#7a3a48']} />
       <LintelFontPreload />
       <CameraRig />
       <Tick onTick={onTick} />

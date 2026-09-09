@@ -49,16 +49,16 @@ export function Overlays({ world }: { world: Snapshot }) {
           style={{
             height: 18,
             borderRadius: 9,
-            background: '#3a1020',
+            background: '#6a2030',
             overflow: 'hidden',
-            border: '1px solid #f0c070',
+            border: '1px solid #ffd27a',
           }}
         >
           <div
             style={{
               width: `${hungerPct}%`,
               height: '100%',
-              background: world.hunger > 0.35 ? '#ef6c00' : '#c4452d',
+              background: world.hunger > 0.35 ? '#ff9a2a' : '#e24b2c',
             }}
           />
         </div>
