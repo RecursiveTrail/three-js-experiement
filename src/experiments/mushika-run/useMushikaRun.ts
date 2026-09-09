@@ -28,6 +28,12 @@ export function useMushikaRun() {
   }, [world.seq, world.cue, player])
 
   useEffect(() => {
+    if (world.phase === 'playing' && world.seq === 0 && world.distance === 0) {
+      player.stopAll()
+    }
+  }, [world.phase, world.seq, world.distance, player])
+
+  useEffect(() => {
     const root = rootRef.current
     if (!root) return
     const onCommand = (command: Command) => {

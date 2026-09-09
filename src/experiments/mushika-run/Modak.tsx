@@ -12,8 +12,8 @@ const COLORS = {
 
 export function Modak({ modak, distance }: { modak: ModakState; distance: number }) {
   const spark = useRef<Mesh>(null)
-  useFrame(({ clock }) => {
-    if (spark.current) spark.current.rotateY(clock.getDelta() * 4)
+  useFrame((_, dt) => {
+    spark.current?.rotateY(dt * 4)
   })
   const y = modak.high ? 0.7 : 0.12
   return (

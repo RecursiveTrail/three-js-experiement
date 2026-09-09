@@ -1,1 +1,6 @@
 html, body, #root { margin: 0; height: 100%; }
+
+.mushika-run-root {
+  height: 100vh;
+  height: 100dvh;
+}

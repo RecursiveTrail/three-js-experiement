@@ -26,6 +26,12 @@ describe('commandFromKey', () => {
   })
 })
 
+function pointerEvent(type: string, init: PointerEventInit & { pointerId: number }) {
+  const event = new PointerEvent(type, { bubbles: true, ...init })
+  Object.defineProperty(event, 'pointerId', { configurable: true, value: init.pointerId })
+  return event
+}
+
 describe('subscribeMushikaInput', () => {
   it('fires swipe, tap jump, ignores down-swipe, link pointer, and inactive', () => {
     const root = document.createElement('div')
@@ -52,6 +58,21 @@ describe('subscribeMushikaInput', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space', bubbles: true }))
 
     expect(seen).toEqual(['laneLeft', 'jump', 'laneLeft'])
+    stop()
+    root.remove()
+  })
+
+  it('ignores pointerup from a different pointer id', () => {
+    const root = document.createElement('div')
+    document.body.appendChild(root)
+    const seen: string[] = []
+    const stop = subscribeMushikaInput(window, root, (c) => seen.push(c), () => true)
+
+    root.dispatchEvent(pointerEvent('pointerdown', { clientX: 100, clientY: 100, pointerId: 1 }))
+    root.dispatchEvent(pointerEvent('pointerup', { clientX: 40, clientY: 100, pointerId: 2 }))
+    expect(seen).toEqual([])
+    root.dispatchEvent(pointerEvent('pointerup', { clientX: 40, clientY: 100, pointerId: 1 }))
+    expect(seen).toEqual(['laneLeft'])
     stop()
     root.remove()
   })

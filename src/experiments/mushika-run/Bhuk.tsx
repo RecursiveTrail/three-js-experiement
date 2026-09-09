@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
+import { bhukPose } from './constants'
 
 export function Bhuk({ hunger, over }: { hunger: number; over: boolean }) {
   const ref = useRef<Group>(null)
@@ -8,15 +9,15 @@ export function Bhuk({ hunger, over }: { hunger: number; over: boolean }) {
     const g = ref.current
     if (!g) return
     const h = over ? 0 : hunger
-    const z = 1.1 + h * 4.8
-    const scale = 1.1 + (1 - h) * 2.4
+    const { z, scale } = bhukPose(h)
     g.position.set(0, 0.4 + Math.sin(clock.elapsedTime * 6) * 0.05 * (1 - h), z)
     g.scale.setScalar(scale)
   })
   const h = over ? 0 : hunger
+  const { z, scale } = bhukPose(h)
   const opacity = 0.12 + (1 - h) * 0.55
   return (
-    <group ref={ref} position={[0, 0.4, 1.1 + hunger * 4.8]}>
+    <group ref={ref} position={[0, 0.4, z]} scale={scale}>
       <mesh scale={[1.6, 0.7, 0.5]}>
         <sphereGeometry args={[0.9, 16, 16]} />
         <meshStandardMaterial color="#2a0810" transparent opacity={opacity} roughness={1} />

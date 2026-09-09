@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { HINT_DISTANCE, TOAST_MS, lastGateLabel, nextGateLine } from './constants'
+import { HINT_DISTANCE, TOAST_MS, lastGateLabel, nextGateLine, type GateId } from './constants'
 import type { Snapshot } from './reduce'
+
+export function toastAfterGates(last: GateId | undefined, _prev: string | null): string | null {
+  if (!last) return null
+  return `${lastGateLabel([last])} unlocked`
+}
 
 export function Overlays({ world }: { world: Snapshot }) {
   const [toast, setToast] = useState<string | null>(null)
   const last = world.gatesReached[world.gatesReached.length - 1]
   useEffect(() => {
-    if (!last) {
-      setToast(null)
-      return
-    }
-    setToast(`${lastGateLabel(world.gatesReached)} unlocked`)
+    setToast((prev) => toastAfterGates(last, prev))
+    if (!last) return
     const t = window.setTimeout(() => setToast(null), TOAST_MS)
     return () => window.clearTimeout(t)
-  }, [last, world.gatesReached])
+  }, [last])
 
   const hungerPct = Math.round(world.hunger * 100)
   const showHint = world.phase === 'playing' && world.distance < HINT_DISTANCE

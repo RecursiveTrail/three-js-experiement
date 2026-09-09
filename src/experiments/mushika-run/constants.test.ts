@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   DRAIN_PER_SECOND,
   GATES,
+  bhukPose,
   drainPerSecond,
   jumpY,
+  laneX,
   lastGateLabel,
   nextGateLine,
   worldZ,
@@ -57,6 +59,38 @@ describe('jumpY and worldZ', () => {
   it('places ahead in -Z', () => {
     expect(worldZ(20, 0)).toBeCloseTo(-20)
     expect(worldZ(80, 80)).toBeCloseTo(0)
+  })
+})
+
+describe('laneX', () => {
+  it('places lanes 1.3 m apart', () => {
+    expect(laneX(-1)).toBeCloseTo(-1.3)
+    expect(laneX(0)).toBe(0)
+    expect(laneX(1)).toBeCloseTo(1.3)
+  })
+})
+
+describe('bhukPose', () => {
+  it('keeps hunger 1 almost off-screen, 0.2 in the bottom third, 0 swallowing', () => {
+    const full = bhukPose(1)
+    const mid = bhukPose(0.5)
+    const low = bhukPose(0.2)
+    const empty = bhukPose(0)
+    expect(full.z).toBeGreaterThan(5.5)
+    expect(full.scale).toBeLessThan(1.2)
+    expect(low.z).toBeGreaterThan(4.4)
+    expect(low.z).toBeLessThan(5.3)
+    expect(low.scale).toBeGreaterThan(1.3)
+    expect(low.scale).toBeLessThan(1.9)
+    expect(empty.z).toBeLessThan(1.2)
+    expect(empty.scale).toBeGreaterThan(3.2)
+    expect(full.z).toBeGreaterThan(mid.z)
+    expect(mid.z).toBeGreaterThan(low.z)
+    expect(low.z).toBeGreaterThan(empty.z)
+    expect(full.scale).toBeLessThan(mid.scale)
+    expect(mid.scale).toBeLessThan(low.scale)
+    expect(low.scale).toBeLessThan(empty.scale)
+    expect(mid.z - low.z).toBeGreaterThan(full.z - mid.z)
   })
 })
 

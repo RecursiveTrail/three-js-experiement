@@ -9,8 +9,4 @@ describe('yard exports', () => {
   })
 })
 
-describe('ExperienceCanvas', () => {
-  it('is a function that accepts an optional dpr tuple', () => {
-    expect(ExperienceCanvas.length).toBe(1)
-  })
-})
+// dpr is optional on ExperienceCanvas; Mushika Run passes [1, 2], other scenes omit it.

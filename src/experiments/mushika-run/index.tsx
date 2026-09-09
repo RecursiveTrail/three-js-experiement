@@ -8,9 +8,9 @@ export function MushikaRunPage() {
   return (
     <div
       ref={rootRef}
+      className="mushika-run-root"
       tabIndex={-1}
       style={{
-        height: '100vh',
         width: '100vw',
         overflow: 'hidden',
         position: 'relative',

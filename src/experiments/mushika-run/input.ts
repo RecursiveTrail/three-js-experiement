@@ -30,7 +30,7 @@ export function subscribeMushikaInput(
   onCommand: (command: Command) => void,
   isActive: () => boolean,
 ): () => void {
-  let down: { x: number; y: number; ignore: boolean } | null = null
+  let down: { x: number; y: number; ignore: boolean; pointerId: number } | null = null
 
   const onKey = (event: KeyboardEvent) => {
     if (!isActive()) return
@@ -41,13 +41,23 @@ export function subscribeMushikaInput(
   }
 
   const onPointerDown = (event: PointerEvent) => {
-    down = { x: event.clientX, y: event.clientY, ignore: isLinkTarget(event) }
+    down = { x: event.clientX, y: event.clientY, ignore: isLinkTarget(event), pointerId: event.pointerId }
+    try {
+      root.setPointerCapture(event.pointerId)
+    } catch {
+      // jsdom / already-released pointers
+    }
   }
 
   const onPointerUp = (event: PointerEvent) => {
-    if (!down) return
+    if (!down || event.pointerId !== down.pointerId) return
     const start = down
     down = null
+    try {
+      root.releasePointerCapture(event.pointerId)
+    } catch {
+      // capture may already be cleared
+    }
     if (!isActive() || start.ignore) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
@@ -59,8 +69,14 @@ export function subscribeMushikaInput(
     if (Math.hypot(dx, dy) < SWIPE_PX) onCommand('jump')
   }
 
-  const onPointerCancel = () => {
+  const onPointerCancel = (event: PointerEvent) => {
+    if (down && event.pointerId !== down.pointerId) return
     down = null
+    try {
+      root.releasePointerCapture(event.pointerId)
+    } catch {
+      // capture may already be cleared
+    }
   }
 
   const onTouchMove = (event: TouchEvent) => {

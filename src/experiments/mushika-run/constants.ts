@@ -79,3 +79,20 @@ export function worldZ(atDistance: number, distance: number): number {
 export function laneX(lane: Lane): number {
   return lane * LANE_SPACING
 }
+
+/** Visual distance of Bhuk: 1 ≈ off-screen, 0.2 ≈ bottom third, 0 ≈ swallows the mouse. */
+export function bhukPose(hunger: number): { z: number; scale: number } {
+  const h = Math.min(1, Math.max(0, hunger))
+  const keys = [
+    { h: 0, z: 0.45, scale: 4.2 },
+    { h: 0.2, z: 4.9, scale: 1.55 },
+    { h: 0.5, z: 5.7, scale: 1.05 },
+    { h: 1, z: 5.95, scale: 0.9 },
+  ] as const
+  const hi = keys.findIndex((k) => k.h >= h)
+  const b = keys[hi === -1 ? keys.length - 1 : hi]!
+  const a = keys[Math.max(0, hi - 1)]!
+  if (a.h === b.h) return { z: b.z, scale: b.scale }
+  const t = (h - a.h) / (b.h - a.h)
+  return { z: a.z + (b.z - a.z) * t, scale: a.scale + (b.scale - a.scale) * t }
+}

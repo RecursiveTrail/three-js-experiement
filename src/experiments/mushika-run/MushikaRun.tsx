@@ -12,7 +12,7 @@ import {
   LOOK_AT,
 } from './constants'
 import { Bhuk } from './Bhuk'
-import { Gate } from './Gate'
+import { Gate, LintelFontPreload } from './Gate'
 import { Modak } from './Modak'
 import { Mushika } from './Mushika'
 import { Street } from './Street'
@@ -42,6 +42,7 @@ function Tick({ onTick }: { onTick: (dt: number) => void }) {
 export function MushikaRun({ world, onTick }: { world: Snapshot; onTick: (dt: number) => void }) {
   return (
     <ExperienceCanvas camera={{ position: CAMERA_POS, fov: CAMERA_FOV }} dpr={DPR}>
+      <LintelFontPreload />
       <CameraRig />
       <Tick onTick={onTick} />
       <Street distance={world.distance} />

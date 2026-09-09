@@ -1,5 +1,19 @@
 import { Text } from '@react-three/drei'
+import { Suspense } from 'react'
+import { assetUrl } from '../../shared/assetUrl'
 import { worldZ, type GateId } from './constants'
+
+export const LINTEL_FONT = assetUrl('assets/mushika-run/fonts/inter-latin-400-normal.woff')
+
+export function LintelFontPreload() {
+  return (
+    <Suspense fallback={null}>
+      <Text font={LINTEL_FONT} fontSize={0.01} position={[0, -40, 0]} visible={false}>
+        Siddhivinayak
+      </Text>
+    </Suspense>
+  )
+}
 
 export function Gate({
   name,
@@ -34,9 +48,18 @@ export function Gate({
         <torusGeometry args={[0.18, 0.05, 8, 16, Math.PI]} />
         <meshStandardMaterial color="#e8a317" />
       </mesh>
-      <Text position={[0, 2.35, 0.14]} fontSize={fontSize} color="#3a1208" anchorX="center" anchorY="middle">
-        {name}
-      </Text>
+      <Suspense fallback={null}>
+        <Text
+          font={LINTEL_FONT}
+          position={[0, 2.35, 0.14]}
+          fontSize={fontSize}
+          color="#3a1208"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {name}
+        </Text>
+      </Suspense>
     </group>
   )
 }

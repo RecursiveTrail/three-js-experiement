@@ -64,4 +64,28 @@ describe('spawnNext', () => {
     expect(items[0]!.high).toBe(true)
     expect(items[0]!.kind).toBe('talniche')
   })
+
+  it('places ukadiche then talniche 2 m apart in the same lane', () => {
+    const rng = seqRng([0.5, 0.5, 0])
+    const items = spawnNext(0, -KING_GAP_M, rng)
+    expect(items).toHaveLength(2)
+    expect(items[0]!.kind).toBe('ukadiche')
+    expect(items[1]!.kind).toBe('talniche')
+    expect(items[0]!.lane).toBe(items[1]!.lane)
+    expect(items[0]!.high).toBe(false)
+    expect(items[1]!.high).toBe(false)
+    expect(items[1]!.atDistance - items[0]!.atDistance).toBeCloseTo(2)
+    for (const m of items) {
+      expect(inWindow(m.atDistance, 0)).toBe(true)
+    }
+  })
+
+  it('spawns a high king when lastKingAt allows it', () => {
+    const rng = seqRng([0.9, 0.5, 0, 0])
+    const items = spawnNext(0, -KING_GAP_M, rng)
+    expect(items).toHaveLength(1)
+    expect(items[0]!.kind).toBe('king')
+    expect(items[0]!.high).toBe(true)
+    expect(inWindow(items[0]!.atDistance, 0)).toBe(true)
+  })
 })

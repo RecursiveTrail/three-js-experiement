@@ -57,6 +57,18 @@ describe('createMushikaPlayer', () => {
     player.dispose()
   })
 
+  it('resolves when fetch returns a 404 Response', async () => {
+    const { ctx, started } = mockContext()
+    const player = createMushikaPlayer({
+      basePath: '/assets/mushika-run/audio',
+      context: ctx,
+      fetchImpl: (async () => new Response(null, { status: 404 })) as typeof fetch,
+    })
+    await expect(player.play('rumble')).resolves.toBeUndefined()
+    expect(started).toHaveLength(0)
+    player.dispose()
+  })
+
   it('stopAll stops live sources', async () => {
     const { ctx, stopped } = mockContext()
     const player = createMushikaPlayer({
