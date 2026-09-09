@@ -7,7 +7,10 @@ export function Overlays({ world }: { world: Snapshot }) {
   const [toast, setToast] = useState<string | null>(null)
   const last = world.gatesReached[world.gatesReached.length - 1]
   useEffect(() => {
-    if (!last) return
+    if (!last) {
+      setToast(null)
+      return
+    }
     setToast(`${lastGateLabel(world.gatesReached)} unlocked`)
     const t = window.setTimeout(() => setToast(null), TOAST_MS)
     return () => window.clearTimeout(t)
