@@ -18,4 +18,10 @@ export const experiments: readonly Experiment[] = [
     path: '/dahi-handi',
     description: 'Little Krishna jumps to smash hanging dahi handis.',
   },
+  {
+    id: 'mushika-run',
+    title: 'Mushika Run',
+    path: '/mushika-run',
+    description: 'Ganpati’s mouse runs three festive lanes. Eat modaks before Hunger catches you.',
+  },
 ]

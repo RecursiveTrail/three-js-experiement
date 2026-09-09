@@ -9,4 +9,8 @@ describe('experiments', () => {
   it('lists Dahi Handi at /dahi-handi', () => {
     expect(experiments.some((e) => e.id === 'dahi-handi' && e.path === '/dahi-handi')).toBe(true)
   })
+
+  it('lists Mushika Run at /mushika-run', () => {
+    expect(experiments.some((e) => e.id === 'mushika-run' && e.path === '/mushika-run')).toBe(true)
+  })
 })
