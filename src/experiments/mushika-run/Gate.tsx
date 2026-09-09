@@ -1,0 +1,42 @@
+import { Text } from '@react-three/drei'
+import { worldZ, type GateId } from './constants'
+
+export function Gate({
+  name,
+  atDistance,
+  distance,
+  reached,
+}: {
+  name: string
+  id: GateId
+  atDistance: number
+  distance: number
+  reached: boolean
+}) {
+  const z = worldZ(atDistance, distance)
+  if (z < -28 || z > 10) return null
+  const flash = reached && distance - atDistance >= 0 && distance - atDistance < 2
+  const saffron = flash ? '#ffb347' : '#ef6c00'
+  const fontSize = name.length > 14 ? 0.13 : 0.16
+  return (
+    <group position={[0, 0, z]}>
+      {[-2.15, 2.15].map((x) => (
+        <mesh key={x} position={[x, 1.2, 0]}>
+          <cylinderGeometry args={[0.08, 0.1, 2.4, 8]} />
+          <meshStandardMaterial color={saffron} />
+        </mesh>
+      ))}
+      <mesh position={[0, 2.35, 0]}>
+        <boxGeometry args={[4.6, 0.28, 0.22]} />
+        <meshStandardMaterial color="#c4452d" emissive={flash ? '#ff7a18' : '#000'} emissiveIntensity={flash ? 0.8 : 0} />
+      </mesh>
+      <mesh position={[0, 2.55, 0]} rotation={[0, 0, 0.05]}>
+        <torusGeometry args={[0.18, 0.05, 8, 16, Math.PI]} />
+        <meshStandardMaterial color="#e8a317" />
+      </mesh>
+      <Text position={[0, 2.35, 0.14]} fontSize={fontSize} color="#3a1208" anchorX="center" anchorY="middle">
+        {name}
+      </Text>
+    </group>
+  )
+}
