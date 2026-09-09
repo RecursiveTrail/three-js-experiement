@@ -13,6 +13,8 @@ export const DRAIN_GATE_MULT = 1.15
 export const DRAIN_GATE_CAP = 5
 export const JUMP_S = 0.45
 export const JUMP_HEIGHT = 0.7
+export const CELEBRATE_S = 1.8
+export const CELEBRATE_HEIGHT = 1.05
 export const LANE_SPACING = 1.3
 export const COLLECT_RADIUS = 0.7
 export const HIGH_JUMP_MIN = 0.3
@@ -20,7 +22,7 @@ export const HIGH_JUMP_MAX = 0.7
 export const LANE_LERP_S = 0.12
 export const HINT_S = 3
 export const HINT_DISTANCE = HINT_S * SPEED
-export const TOAST_MS = 1200
+export const TOAST_MS = 1800
 export const GATE_POINTS = 100
 export const GATE_CLEAR_M = 5
 export const SPAWN_AHEAD_MIN = 20
@@ -70,6 +72,12 @@ export function lastGateLabel(gatesReached: readonly GateId[]): string {
 export function jumpY(jumpT: number | null): number {
   if (jumpT === null) return 0
   return JUMP_HEIGHT * Math.sin(Math.PI * jumpT)
+}
+
+/** Two hops during a pandal blessing (0..1). */
+export function celebrateY(celebrateT: number | null): number {
+  if (celebrateT === null) return 0
+  return CELEBRATE_HEIGHT * Math.abs(Math.sin(Math.PI * 2 * celebrateT))
 }
 
 export function worldZ(atDistance: number, distance: number): number {

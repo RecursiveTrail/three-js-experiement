@@ -29,7 +29,7 @@ export function Gate({
 }) {
   const z = worldZ(atDistance, distance)
   if (z < -28 || z > 10) return null
-  const flash = reached && distance - atDistance >= 0 && distance - atDistance < 2
+  const flash = reached && distance - atDistance >= 0 && distance - atDistance < 18
   const saffron = flash ? '#ffc56a' : '#ff8f2a'
   const fontSize = name.length > 14 ? 0.13 : 0.16
   return (

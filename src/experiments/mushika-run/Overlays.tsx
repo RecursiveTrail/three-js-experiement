@@ -5,7 +5,7 @@ import type { Snapshot } from './reduce'
 
 export function toastAfterGates(last: GateId | undefined, _prev: string | null): string | null {
   if (!last) return null
-  return `${lastGateLabel([last])} unlocked`
+  return `${lastGateLabel([last])}! Jai Ganpati`
 }
 
 export function Overlays({ world }: { world: Snapshot }) {
@@ -67,7 +67,7 @@ export function Overlays({ world }: { world: Snapshot }) {
           <span style={{ fontSize: 14, fontWeight: 500 }}>{nextGateLine(world.distance)}</span>
         </div>
         {toast ? (
-          <div style={{ marginTop: 10, fontSize: 16, fontWeight: 700, color: '#ffd27a' }}>{toast}</div>
+          <div style={{ marginTop: 10, fontSize: 20, fontWeight: 800, color: '#ffd27a' }}>{toast}</div>
         ) : null}
         {showHint ? (
           <div style={{ marginTop: 10, fontSize: 15 }}>swipe to change lane · swipe up to jump</div>

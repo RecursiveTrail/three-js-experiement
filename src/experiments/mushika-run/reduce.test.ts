@@ -113,14 +113,49 @@ describe('collect', () => {
 })
 
 describe('gates', () => {
-  it('awards Siddhivinayak once at 80 m', () => {
-    const hit = reduce(playing({ distance: 79 }), { type: 'tick', dt: 0.2 }, quiet)
+  it('awards Siddhivinayak once at 80 m and starts a celebration', () => {
+    const hit = reduce(playing({ distance: 79, hunger: 0.8 }), { type: 'tick', dt: 0.2 }, quiet)
     expect(hit.distance).toBeCloseTo(81)
     expect(hit.gatesReached).toEqual(['siddhivinayak'])
     expect(hit.score).toBe(100)
     expect(hit.cue).toBe('bell')
+    expect(hit.celebrateT).toBe(0)
+    expect(hit.jumpT).toBeNull()
     const later = reduce(hit, { type: 'tick', dt: 1 }, quiet)
     expect(later.gatesReached).toEqual(['siddhivinayak'])
+    expect(later.hunger).toBeCloseTo(0.8)
+    expect(later.celebrateT).toBeGreaterThan(0)
+    expect(later.celebrateT).toBeLessThan(1)
+  })
+
+  it('does not collect modaks or take a player jump during celebration', () => {
+    const next = reduce(
+      playing({
+        celebrateT: 0.2,
+        lane: 0,
+        hunger: 0.5,
+        distance: 81,
+        score: 100,
+        gatesReached: ['siddhivinayak'],
+        modaks: [{ id: 1, kind: 'king', lane: 0, high: false, atDistance: 81 }],
+      }),
+      { type: 'tick', dt: 0 },
+      quiet,
+    )
+    expect(next.modaks.some((m) => m.id === 1)).toBe(true)
+    expect(next.score).toBe(100)
+    expect(next.hunger).toBe(0.5)
+    expect(reduce(next, { type: 'jump' }, quiet).jumpT).toBeNull()
+  })
+
+  it('ends the dance and resumes drain after 1.8 s', () => {
+    const end = reduce(playing({ celebrateT: 0.9, hunger: 0.8, gatesReached: ['siddhivinayak'] }), {
+      type: 'tick',
+      dt: 0.3,
+    }, quiet)
+    expect(end.celebrateT).toBeNull()
+    const after = reduce(end, { type: 'tick', dt: 1 }, quiet)
+    expect(after.hunger).toBeCloseTo(0.8 - 0.1 * 1.15)
   })
 })
 

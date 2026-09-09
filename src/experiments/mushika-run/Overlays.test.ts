@@ -3,11 +3,11 @@ import { toastAfterGates } from './Overlays'
 
 describe('toastAfterGates', () => {
   it('clears toast when no gate is last', () => {
-    expect(toastAfterGates(undefined, 'Siddhivinayak unlocked')).toBeNull()
+    expect(toastAfterGates(undefined, 'Siddhivinayak! Jai Ganpati')).toBeNull()
     expect(toastAfterGates(undefined, null)).toBeNull()
   })
 
   it('names the unlocked gate', () => {
-    expect(toastAfterGates('siddhivinayak', null)).toBe('Siddhivinayak unlocked')
+    expect(toastAfterGates('siddhivinayak', null)).toBe('Siddhivinayak! Jai Ganpati')
   })
 })

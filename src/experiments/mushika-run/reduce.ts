@@ -1,4 +1,5 @@
 import {
+  CELEBRATE_S,
   COLLECT_RADIUS,
   DESPAWN_BEHIND,
   GATE_POINTS,
@@ -31,6 +32,7 @@ export type Snapshot = {
   phase: 'playing' | 'over'
   lane: Lane
   jumpT: number | null
+  celebrateT: number | null
   hunger: number
   score: number
   distance: number
@@ -54,6 +56,7 @@ export function initialSnapshot(): Snapshot {
     phase: 'playing',
     lane: 0,
     jumpT: null,
+    celebrateT: null,
     hunger: 1,
     score: 0,
     distance: 0,
@@ -72,7 +75,8 @@ function clampLane(n: number): Lane {
   return n as Lane
 }
 
-function canCollect(s: Snapshot, m: Modak): boolean {
+function canCollect(s: Snapshot, m: Modak, freeze: boolean): boolean {
+  if (freeze) return false
   if (m.lane !== s.lane) return false
   if (Math.abs(m.atDistance - s.distance) > COLLECT_RADIUS) return false
   if (m.high) {
@@ -93,8 +97,16 @@ function applySpawn(s: Snapshot, spawned: SpawnedModak[]): Snapshot {
 }
 
 function tickPlaying(s: Snapshot, dt: number, rng: () => number): Snapshot {
+  let celebrateT = s.celebrateT
+  if (celebrateT !== null) {
+    celebrateT += dt / CELEBRATE_S
+    if (celebrateT >= 1) celebrateT = null
+  }
+
   let jumpT = s.jumpT
-  if (jumpT !== null) {
+  if (s.celebrateT !== null) {
+    jumpT = null
+  } else if (jumpT !== null) {
     jumpT += dt / JUMP_S
     if (jumpT >= 1) jumpT = null
   }
@@ -103,16 +115,40 @@ function tickPlaying(s: Snapshot, dt: number, rng: () => number): Snapshot {
     ...s,
     distance: s.distance + SPEED * dt,
     jumpT,
+    celebrateT,
     cue: null,
   }
+
+  let gatesReached = next.gatesReached
+  let gated = false
+  let score = next.score
+  for (const g of GATES) {
+    if (next.distance >= g.distance && !gatesReached.includes(g.id)) {
+      gatesReached = [...gatesReached, g.id]
+      score += GATE_POINTS
+      gated = true
+    }
+  }
+  if (gated) {
+    next = {
+      ...next,
+      gatesReached,
+      score,
+      jumpT: null,
+      celebrateT: 0,
+      seq: next.seq + 1,
+      cue: 'bell',
+    }
+  }
+
+  const freeze = s.celebrateT !== null || gated
 
   const kept: Modak[] = []
   let collected = false
   let hunger = next.hunger
-  let score = next.score
   let nextModakId = next.nextModakId
   for (const m of next.modaks) {
-    if (canCollect(next, m)) {
+    if (canCollect(next, m, freeze)) {
       hunger = Math.min(1, hunger + MODAK[m.kind].hunger)
       score += MODAK[m.kind].points
       collected = true
@@ -126,21 +162,10 @@ function tickPlaying(s: Snapshot, dt: number, rng: () => number): Snapshot {
     next = { ...next, seq: next.seq + 1, cue: 'nibble' }
   }
 
-  let gatesReached = next.gatesReached
-  let gated = false
-  for (const g of GATES) {
-    if (next.distance >= g.distance && !gatesReached.includes(g.id)) {
-      gatesReached = [...gatesReached, g.id]
-      score += GATE_POINTS
-      gated = true
-    }
+  if (!freeze) {
+    hunger = Math.max(0, next.hunger - drainPerSecond(next.gatesReached.length) * dt)
+    next = { ...next, hunger }
   }
-  if (gated) {
-    next = { ...next, gatesReached, score, seq: next.seq + 1, cue: 'bell' }
-  }
-
-  hunger = Math.max(0, next.hunger - drainPerSecond(next.gatesReached.length) * dt)
-  next = { ...next, hunger }
 
   const live = next.modaks.filter((m) => m.atDistance - next.distance >= DESPAWN_BEHIND)
   next = { ...next, modaks: live }
@@ -148,12 +173,12 @@ function tickPlaying(s: Snapshot, dt: number, rng: () => number): Snapshot {
     const ahead = m.atDistance - next.distance
     return ahead >= SPAWN_AHEAD_MIN && ahead <= SPAWN_AHEAD_MAX
   })
-  if (!windowBusy) {
+  if (!windowBusy && !freeze) {
     next = applySpawn(next, spawnNext(next.distance, next.lastKingAt, rng))
   }
 
   if (next.hunger <= 0) {
-    return { ...next, hunger: 0, phase: 'over', jumpT: null, seq: next.seq + 1, cue: 'rumble' }
+    return { ...next, hunger: 0, phase: 'over', jumpT: null, celebrateT: null, seq: next.seq + 1, cue: 'rumble' }
   }
   return next
 }
@@ -167,7 +192,7 @@ export function reduce(state: Snapshot, event: Event, rng: () => number = Math.r
   if (event.type === 'laneLeft') return { ...state, lane: clampLane(state.lane - 1) }
   if (event.type === 'laneRight') return { ...state, lane: clampLane(state.lane + 1) }
   if (event.type === 'jump') {
-    if (state.jumpT !== null) return state
+    if (state.celebrateT !== null || state.jumpT !== null) return state
     return { ...state, jumpT: 0 }
   }
   return tickPlaying(state, event.dt, rng)

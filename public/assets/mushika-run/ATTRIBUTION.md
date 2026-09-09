@@ -19,3 +19,11 @@ https://github.com/rsms/inter — The Inter Project Authors. SIL OFL 1.1.
 | File | Source | Notes |
 |---|---|---|
 | `fonts/inter-latin-400-normal.woff` | [Inter](https://github.com/rsms/inter) via Fontsource latin-400 | Bundled for lintel Text; no runtime CDN |
+
+## Roadside Ganpati stills
+
+User-supplied festival images. Not CC0. Keep them experiment-local.
+
+| File | Source | Notes |
+|---|---|---|
+| `ganpati/ganpati-1.jpg` … `ganpati-7.jpg` | `src/experiments/mushika-run/assets/sample/` | Portrait stills, resized to ≤1024px for roadside boards |
