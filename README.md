@@ -12,6 +12,7 @@ npm run dev
 - `/` — experiment list
 - `/cat-world` — backyard cat. Mash the keyboard.
 - `/dahi-handi` — little Krishna smashes hanging dahi handis.
+- `/mushika-run` — Mushika runs three festive lanes. Portrait-first.
 
 ```bash
 npm test
@@ -43,6 +44,16 @@ Stylized mesh Krishna in a dollhouse room.
 - Count stays on screen.
 
 Assets: `public/assets/dahi-handi`. Licenses: `public/assets/dahi-handi/ATTRIBUTION.md`.
+
+## Mushika Run
+
+Procedural mesh mouse on a recycled Ganesh-night street.
+
+- Auto-run, swipe to change lane, swipe up or tap to jump.
+- Eat modaks to keep Hunger back. Bhuk is the only fail.
+- Five named pandal gates. The pilgrimage list is this run only.
+
+Assets: `public/assets/mushika-run`. Licenses: `public/assets/mushika-run/ATTRIBUTION.md`.
 
 ## Roadmap
 

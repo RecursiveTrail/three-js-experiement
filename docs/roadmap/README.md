@@ -13,6 +13,8 @@ This folder is the queue. Each experiment is a new route. One new primitive per 
 | Queued | Rapier knock-over | `/knock-over` | Rapier physics |
 | Queued | Scroll image tube | `/scroll-tube` | Scroll ↔ WebGL sync |
 
+Off-ladder festival scenes (not GPU-ladder items): Dahi Handi (`/dahi-handi`), Mushika Run (`/mushika-run`, portrait-first).
+
 Full write-up: [2026-09-05-experiment-ladder.md](./2026-09-05-experiment-ladder.md)
 
 Shared process for every new slice: copy `_template`, register in `src/app/experiments.ts` and `src/app/App.tsx`, reuse `ExperienceCanvas`, one learning note, ship Pages.
