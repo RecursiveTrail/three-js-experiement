@@ -8,3 +8,9 @@ describe('yard exports', () => {
     expect(typeof Yard).toBe('function')
   })
 })
+
+describe('ExperienceCanvas', () => {
+  it('is a function that accepts an optional dpr tuple', () => {
+    expect(ExperienceCanvas.length).toBe(1)
+  })
+})
