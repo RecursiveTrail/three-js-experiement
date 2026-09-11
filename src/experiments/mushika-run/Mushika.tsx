@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
-import { LANE_LERP_S, celebrateY, jumpY, laneX } from './constants'
+import { LANE_LERP_S, jumpY, laneX } from './constants'
 import type { Snapshot } from './reduce'
 
 const SKIN = '#f4c45a'
@@ -43,21 +43,20 @@ export function Mushika({ world }: { world: Snapshot }) {
     const target = laneX(world.lane)
     const k = 1 - Math.exp(-dt / LANE_LERP_S)
     g.position.x += (target - g.position.x) * k
-    const celebrating = world.celebrateT !== null
+    const blessing = world.phase === 'opening' || world.phase === 'shrine'
     const hopping = world.jumpT !== null
-    const running = world.phase === 'playing' && !hopping && !celebrating
+    const running = world.phase === 'playing' && !hopping
     const t = clock.elapsedTime * RUN
     const stride = running ? Math.sin(t) : 0
-    let y = celebrating ? celebrateY(world.celebrateT) : jumpY(world.jumpT)
+    let y = blessing ? 0 : jumpY(world.jumpT)
     if (running) y += Math.abs(Math.sin(t * 2)) * 0.07
     g.position.y = y
     g.position.z = 0
-    if (celebrating) {
-      const c = world.celebrateT ?? 0
-      g.rotation.x = c * Math.PI * 4
-      g.rotation.y = Math.sin(c * Math.PI * 4) * 0.25
-      g.rotation.z = Math.sin(c * Math.PI * 4) * 0.12
-      g.scale.set(1.08, 1.16, 1.08)
+    if (blessing) {
+      g.rotation.x = 0
+      g.rotation.y = 0
+      g.rotation.z = 0
+      g.scale.set(1, 1, 1)
     } else {
       g.rotation.x = hopping ? -0.18 : running ? Math.abs(stride) * 0.05 : 0
       g.rotation.y = 0
@@ -65,27 +64,21 @@ export function Mushika({ world }: { world: Snapshot }) {
       g.scale.set(1, hopping ? 1.1 : 1, 1)
     }
 
-    const lift = celebrating ? Math.sin((world.celebrateT ?? 0) * Math.PI * 4) * 0.9 : hopping ? 0.75 : 0
-    if (lf.current) lf.current.rotation.x = celebrating ? lift : lift || stride * 0.85
-    if (rf.current) rf.current.rotation.x = celebrating ? -lift : lift || -stride * 0.85
-    if (lb.current) lb.current.rotation.x = celebrating ? -lift * 0.7 : hopping ? 0.55 : -stride * 0.75
-    if (rb.current) rb.current.rotation.x = celebrating ? lift * 0.7 : hopping ? 0.55 : stride * 0.75
+    const lift = hopping ? 0.75 : 0
+    if (lf.current) lf.current.rotation.x = lift || stride * 0.85
+    if (rf.current) rf.current.rotation.x = lift || -stride * 0.85
+    if (lb.current) lb.current.rotation.x = hopping ? 0.55 : -stride * 0.75
+    if (rb.current) rb.current.rotation.x = hopping ? 0.55 : stride * 0.75
 
     if (ears.current) {
-      ears.current.rotation.z = celebrating
-        ? Math.sin((world.celebrateT ?? 0) * Math.PI * 6) * 0.18
-        : running
-          ? stride * 0.08
-          : Math.sin(clock.elapsedTime * 2.2) * 0.03
+      ears.current.rotation.z = running
+        ? stride * 0.08
+        : Math.sin(clock.elapsedTime * 2.2) * 0.03
     }
 
-    const wag = celebrating
-      ? Math.sin((world.celebrateT ?? 0) * Math.PI * 8) * 0.8
-      : running
-        ? Math.sin(t * 0.9)
-        : Math.sin(clock.elapsedTime * 2.4) * 0.2
+    const wag = running ? Math.sin(t * 0.9) : Math.sin(clock.elapsedTime * 2.4) * 0.2
     if (tail.current) {
-      tail.current.rotation.x = celebrating ? -1.35 : hopping ? -1.15 : -0.45 + (running ? Math.sin(t) * 0.22 : 0)
+      tail.current.rotation.x = hopping ? -1.15 : -0.45 + (running ? Math.sin(t) * 0.22 : 0)
       tail.current.rotation.y = wag * 0.55
     }
     if (t1.current) t1.current.rotation.y = wag * 0.35
@@ -97,7 +90,7 @@ export function Mushika({ world }: { world: Snapshot }) {
       blob.position.x = g.position.x
       blob.position.y = SHADOW_Y
       blob.position.z = 0
-      const squash = celebrating || hopping ? 0.62 : 1
+      const squash = hopping ? 0.62 : 1
       blob.scale.set(squash, 1, squash)
     }
   })

@@ -5,7 +5,6 @@ import {
   GATES,
   PASS_M,
   bhukPose,
-  celebrateY,
   doorOpenT,
   drainPerSecond,
   flowerPalette,
@@ -59,20 +58,12 @@ describe('lastGateLabel', () => {
   })
 })
 
-describe('jumpY, celebrateY and worldZ', () => {
+describe('jumpY and worldZ', () => {
   it('is 0 on the ground and ~0.7 at apex', () => {
     expect(jumpY(null)).toBe(0)
     expect(jumpY(0)).toBeCloseTo(0)
     expect(jumpY(0.5)).toBeCloseTo(0.7)
     expect(jumpY(1)).toBeCloseTo(0)
-  })
-
-  it('hops twice during a gate dance', () => {
-    expect(celebrateY(null)).toBe(0)
-    expect(celebrateY(0)).toBeCloseTo(0)
-    expect(celebrateY(0.25)).toBeGreaterThan(0.8)
-    expect(celebrateY(0.5)).toBeCloseTo(0)
-    expect(celebrateY(0.75)).toBeGreaterThan(0.8)
   })
 
   it('places ahead in -Z', () => {
