@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { worldZ } from './constants'
-import { GanpatiAlongRoad, TILE_LEN } from './GanpatiAlongRoad'
+import { FlowersAlongRoad, TILE_LEN } from './FlowersAlongRoad'
 
 const TILE_COUNT = 8
 const ROAD = '#e2c49a'
@@ -57,7 +57,7 @@ export function Street({ distance }: { distance: number }) {
         </group>
       ))}
       <Suspense fallback={null}>
-        <GanpatiAlongRoad distance={distance} tiles={tiles} />
+        <FlowersAlongRoad distance={distance} tiles={tiles} />
       </Suspense>
       <hemisphereLight args={['#ffe0b8', '#d4a060', 0.9]} />
       <ambientLight intensity={0.62} />
