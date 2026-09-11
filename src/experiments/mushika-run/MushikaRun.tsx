@@ -10,6 +10,7 @@ import {
   DT_CAP,
   GATES,
   LOOK_AT,
+  liveGateId,
 } from './constants'
 import { Bhuk } from './Bhuk'
 import { Gate, LintelFontPreload } from './Gate'
@@ -59,6 +60,9 @@ export function MushikaRun({ world, onTick }: { world: Snapshot; onTick: (dt: nu
           atDistance={g.distance}
           distance={world.distance}
           reached={world.gatesReached.includes(g.id)}
+          phase={world.phase}
+          openingT={world.openingT}
+          liveId={liveGateId(world.gatesReached)}
         />
       ))}
       <Bhuk hunger={world.hunger} over={world.phase === 'over'} />
