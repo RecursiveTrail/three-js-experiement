@@ -30,20 +30,33 @@ export const DESPAWN_BEHIND = -4
 export const KING_GAP_M = 80
 export const DT_CAP = 0.05
 
-export const CAMERA_POS: [number, number, number] = [0, 2.4, 6.2]
+export const CAMERA_POS: [number, number, number] = [0, 2.55, 6.2]
 export const CAMERA_FOV = 50
-export const CAMERA_FOV_PORTRAIT = 58
-export const LOOK_AT: [number, number, number] = [0, 0.6, 0]
+export const CAMERA_FOV_PORTRAIT = 68
+export const LOOK_AT: [number, number, number] = [0, 0.95, 0]
+export const PLAY_ASPECT_W = 9
+export const PLAY_ASPECT_H = 16
 export const DPR: [number, number] = [1, 2]
 
 export const GATE_OPEN_S = 0.8
 export const SHRINE_S = 4
 export const PASS_M = 2.5
-export const SHRINE_CAMERA_POS: [number, number, number] = [0, 1.15, 2.6]
-export const SHRINE_LOOK_AT: [number, number, number] = [0, 0.7, 0]
+export const SHRINE_CAMERA_POS: [number, number, number] = [0, 1.72, 4.05]
+export const SHRINE_LOOK_AT: [number, number, number] = [0, 1.28, 0]
 export const SHRINE_FALLBACK_FILL = '#1a0c10'
-export const FLOWER_SIDE_X = 3.2
+export const FLOWER_SIDE_X = 2.55
 export const FLOWER_GATE_CLEAR = 10
+
+export function flowerBedXs(): number[] {
+  return [2.55, 3.3, 4.1, 4.9]
+}
+
+export function flowerBedZs(tileLen: number): number[] {
+  const zs: number[] = []
+  const step = 0.72
+  for (let z = -tileLen / 2 + 0.36; z <= tileLen / 2 - 0.28; z += step) zs.push(z)
+  return zs
+}
 
 export type Phase = 'playing' | 'opening' | 'shrine' | 'over'
 export type FlowerStretch = 'marigold' | 'jasmine' | 'hibiscus' | 'lotus' | 'rose' | 'mixed'

@@ -15,6 +15,10 @@ import {
   liveGateId,
   nearFlowerGate,
   nextGateLine,
+  PLAY_ASPECT_W,
+  PLAY_ASPECT_H,
+  flowerBedXs,
+  flowerBedZs,
   resumeDistance,
   shrineStillUrl,
   shrineVideoUrl,
@@ -140,6 +144,26 @@ describe('nearFlowerGate', () => {
     expect(nearFlowerGate(80)).toBe(true)
     expect(nearFlowerGate(70.1)).toBe(true)
     expect(nearFlowerGate(50)).toBe(false)
+  })
+})
+
+describe('playfield aspect', () => {
+  it('is 9:16 so the mobile frame letterboxes on landscape', () => {
+    expect(PLAY_ASPECT_W / PLAY_ASPECT_H).toBeCloseTo(9 / 16)
+  })
+})
+
+describe('flower beds', () => {
+  it('packs several rows from just outside the curb out to the far verge', () => {
+    const xs = flowerBedXs()
+    expect(xs.length).toBeGreaterThanOrEqual(4)
+    expect(xs[0]).toBeGreaterThan(2.4)
+    expect(xs[0]).toBeLessThan(2.7)
+    expect(xs[xs.length - 1]).toBeGreaterThan(4.6)
+  })
+
+  it('fills the tile length instead of three sparse clumps', () => {
+    expect(flowerBedZs(8).length).toBeGreaterThanOrEqual(8)
   })
 })
 

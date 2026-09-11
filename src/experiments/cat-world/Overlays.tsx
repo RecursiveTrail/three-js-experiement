@@ -14,7 +14,7 @@ export function Overlays({ lastKey, fact }: { lastKey: string | null; fact: stri
       }}
     >
       <div style={{ pointerEvents: 'auto', padding: 16 }}>
-        <Link to="/" style={{ color: '#fff' }}>All experiments</Link>
+        <Link to="/" style={{ color: '#fff' }}>Home</Link>
       </div>
       <div style={{ position: 'absolute', left: 16, bottom: 24, maxWidth: 520 }}>
         {label ? <div style={{ fontSize: 28, fontWeight: 700 }}>You pressed {label}</div> : null}

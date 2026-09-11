@@ -19,6 +19,7 @@ import {
   type ModakKind,
   type Phase,
 } from './constants'
+import { EMPTY_EATEN, type EatenCounts } from './scoreCard'
 import { spawnNext, type SpawnedModak } from './spawn'
 
 export type Cue = 'nibble' | 'bell' | 'rumble' | null
@@ -41,6 +42,7 @@ export type Snapshot = {
   score: number
   distance: number
   gatesReached: GateId[]
+  eaten: EatenCounts
   modaks: Modak[]
   seq: number
   cue: Cue
@@ -66,6 +68,7 @@ export function initialSnapshot(): Snapshot {
     score: 0,
     distance: 0,
     gatesReached: [],
+    eaten: { ...EMPTY_EATEN },
     modaks: [],
     seq: 0,
     cue: null,
@@ -144,18 +147,20 @@ function tickPlaying(s: Snapshot, dt: number, rng: () => number): Snapshot {
   let collected = false
   let hunger = next.hunger
   let score = next.score
+  let eaten: EatenCounts = { ...next.eaten }
   let nextModakId = next.nextModakId
   for (const m of next.modaks) {
     if (canCollect(next, m)) {
       hunger = Math.min(1, hunger + MODAK[m.kind].hunger)
       score += MODAK[m.kind].points
+      eaten = { ...eaten, [m.kind]: eaten[m.kind] + 1 }
       collected = true
       nextModakId = Math.max(nextModakId, m.id + 1)
     } else {
       kept.push(m)
     }
   }
-  next = { ...next, modaks: kept, hunger, score, nextModakId }
+  next = { ...next, modaks: kept, hunger, score, eaten, nextModakId }
   if (collected) next = { ...next, seq: next.seq + 1, cue: 'nibble' }
 
   const g = GATES.find((gate) => next.distance >= gate.distance && !next.gatesReached.includes(gate.id))

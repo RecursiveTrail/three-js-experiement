@@ -80,6 +80,8 @@ describe('collect', () => {
       quiet,
     )
     expect(next.score).toBe(50)
+    expect(next.eaten.king).toBe(1)
+    expect(next.eaten.ukadiche).toBe(0)
     expect(next.hunger).toBe(1)
     expect(next.modaks.some((m) => m.id === 1)).toBe(false)
     expect(next.cue).toBe('nibble')
