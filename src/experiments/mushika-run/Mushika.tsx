@@ -40,22 +40,21 @@ export function Mushika({ world }: { world: Snapshot }) {
   useFrame(({ clock }, dt) => {
     const g = ref.current
     if (!g) return
-    const target = laneX(world.lane)
-    const k = 1 - Math.exp(-dt / LANE_LERP_S)
-    g.position.x += (target - g.position.x) * k
-    const blessing = world.phase === 'opening' || world.phase === 'shrine'
+    const shrine = world.phase === 'shrine'
     const hopping = world.jumpT !== null
     const running = world.phase === 'playing' && !hopping
+    const target = shrine ? 0 : laneX(world.lane)
+    const k = 1 - Math.exp(-dt / LANE_LERP_S)
+    g.position.x += (target - g.position.x) * k
     const t = clock.elapsedTime * RUN
     const stride = running ? Math.sin(t) : 0
-    let y = blessing ? 0 : jumpY(world.jumpT)
+    let y = jumpY(world.jumpT)
     if (running) y += Math.abs(Math.sin(t * 2)) * 0.07
+    if (shrine) y = 0.04 + Math.sin(clock.elapsedTime * 2) * 0.02
     g.position.y = y
-    g.position.z = 0
-    if (blessing) {
-      g.rotation.x = 0
-      g.rotation.y = 0
-      g.rotation.z = 0
+    g.position.z = shrine ? 0.15 : 0
+    if (shrine) {
+      g.rotation.set(0.08, 0, 0)
       g.scale.set(1, 1, 1)
     } else {
       g.rotation.x = hopping ? -0.18 : running ? Math.abs(stride) * 0.05 : 0
@@ -63,10 +62,15 @@ export function Mushika({ world }: { world: Snapshot }) {
       g.rotation.z = running ? stride * 0.05 : 0
       g.scale.set(1, hopping ? 1.1 : 1, 1)
     }
-
-    const lift = hopping ? 0.75 : 0
-    if (lf.current) lf.current.rotation.x = lift || stride * 0.85
-    if (rf.current) rf.current.rotation.x = lift || -stride * 0.85
+    const namaste = shrine ? 0.95 : 0
+    if (lf.current) {
+      lf.current.rotation.x = namaste ? -0.85 : hopping ? 0.75 : stride * 0.85
+      lf.current.rotation.z = namaste ? 0.55 : 0
+    }
+    if (rf.current) {
+      rf.current.rotation.x = namaste ? -0.85 : hopping ? 0.75 : -stride * 0.85
+      rf.current.rotation.z = namaste ? -0.55 : 0
+    }
     if (lb.current) lb.current.rotation.x = hopping ? 0.55 : -stride * 0.75
     if (rb.current) rb.current.rotation.x = hopping ? 0.55 : stride * 0.75
 
