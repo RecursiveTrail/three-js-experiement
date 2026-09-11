@@ -1,14 +1,24 @@
 import { describe, expect, it } from 'vitest'
+import { assetUrl } from '../../shared/assetUrl'
 import {
   DRAIN_PER_SECOND,
   GATES,
+  PASS_M,
   bhukPose,
   celebrateY,
+  doorOpenT,
   drainPerSecond,
+  flowerPalette,
+  hudGateLine,
   jumpY,
   laneX,
   lastGateLabel,
+  liveGateId,
+  nearFlowerGate,
   nextGateLine,
+  resumeDistance,
+  shrineStillUrl,
+  shrineVideoUrl,
   worldZ,
 } from './constants'
 
@@ -112,5 +122,69 @@ describe('GATES', () => {
       ['kasba-ganpati', 440],
       ['lalbaugcha-raja', 600],
     ])
+  })
+})
+
+describe('flowerPalette', () => {
+  it('uses marigold then jasmine then mixed festival', () => {
+    expect(flowerPalette(0).stretch).toBe('marigold')
+    expect(flowerPalette(79.9).stretch).toBe('marigold')
+    expect(flowerPalette(80).stretch).toBe('jasmine')
+    expect(flowerPalette(81).stretch).toBe('jasmine')
+    expect(flowerPalette(180).stretch).toBe('hibiscus')
+    expect(flowerPalette(300).stretch).toBe('lotus')
+    expect(flowerPalette(440).stretch).toBe('rose')
+    expect(flowerPalette(600).stretch).toBe('mixed')
+    expect(flowerPalette(601).stretch).toBe('mixed')
+  })
+
+  it('includes the locked hex colors', () => {
+    expect(flowerPalette(0).colors).toEqual(['#ffc53d', '#ff8a1a', '#5ea04a'])
+    expect(flowerPalette(81).colors[0]).toBe('#f4f0d8')
+  })
+})
+
+describe('nearFlowerGate', () => {
+  it('clears 10 m around each gate distance', () => {
+    expect(nearFlowerGate(80)).toBe(true)
+    expect(nearFlowerGate(70.1)).toBe(true)
+    expect(nearFlowerGate(50)).toBe(false)
+  })
+})
+
+describe('liveGateId and resumeDistance', () => {
+  it('uses the last reached gate', () => {
+    expect(liveGateId([])).toBeUndefined()
+    expect(liveGateId(['siddhivinayak'])).toBe('siddhivinayak')
+    expect(resumeDistance(['siddhivinayak'])).toBeCloseTo(80 + PASS_M)
+    expect(resumeDistance(['siddhivinayak', 'andhericha-raja', 'dagadusheth', 'kasba-ganpati', 'lalbaugcha-raja'])).toBeCloseTo(602.5)
+  })
+})
+
+describe('hudGateLine', () => {
+  it('is the name only during opening and shrine', () => {
+    expect(hudGateLine('opening', 80, ['siddhivinayak'])).toBe('Siddhivinayak')
+    expect(hudGateLine('shrine', 80, ['siddhivinayak'])).toBe('Siddhivinayak')
+  })
+
+  it('uses nextGateLine while playing', () => {
+    expect(hudGateLine('playing', 0, [])).toBe('Siddhivinayak · 80m')
+    expect(hudGateLine('playing', 602.5, ['lalbaugcha-raja'])).toBe('beyond Lalbaugcha Raja')
+  })
+})
+
+describe('doorOpenT', () => {
+  it('is 0 closed, openingT on the live gate, 1 after reached', () => {
+    expect(doorOpenT({ id: 'siddhivinayak', reached: false, phase: 'playing', openingT: null, liveId: undefined })).toBe(0)
+    expect(doorOpenT({ id: 'siddhivinayak', reached: true, phase: 'opening', openingT: 0.5, liveId: 'siddhivinayak' })).toBeCloseTo(0.5)
+    expect(doorOpenT({ id: 'andhericha-raja', reached: false, phase: 'opening', openingT: 0.5, liveId: 'siddhivinayak' })).toBe(0)
+    expect(doorOpenT({ id: 'siddhivinayak', reached: true, phase: 'playing', openingT: null, liveId: 'siddhivinayak' })).toBe(1)
+  })
+})
+
+describe('shrine urls', () => {
+  it('points at local shrines/{id} files', () => {
+    expect(shrineVideoUrl('lalbaugcha-raja')).toBe(assetUrl('assets/mushika-run/shrines/lalbaugcha-raja.mp4'))
+    expect(shrineStillUrl('siddhivinayak')).toBe(assetUrl('assets/mushika-run/shrines/siddhivinayak.jpg'))
   })
 })

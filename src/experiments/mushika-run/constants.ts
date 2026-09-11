@@ -1,3 +1,5 @@
+import { assetUrl } from '../../shared/assetUrl'
+
 export type Lane = -1 | 0 | 1
 export type ModakKind = 'ukadiche' | 'talniche' | 'king'
 export type GateId =
@@ -37,6 +39,18 @@ export const CAMERA_FOV_PORTRAIT = 58
 export const LOOK_AT: [number, number, number] = [0, 0.6, 0]
 export const DPR: [number, number] = [1, 2]
 
+export const GATE_OPEN_S = 0.8
+export const SHRINE_S = 4
+export const PASS_M = 2.5
+export const SHRINE_CAMERA_POS: [number, number, number] = [0, 1.15, 2.6]
+export const SHRINE_LOOK_AT: [number, number, number] = [0, 0.7, 0]
+export const SHRINE_FALLBACK_FILL = '#1a0c10'
+export const FLOWER_SIDE_X = 3.2
+export const FLOWER_GATE_CLEAR = 10
+
+export type Phase = 'playing' | 'opening' | 'shrine' | 'over'
+export type FlowerStretch = 'marigold' | 'jasmine' | 'hibiscus' | 'lotus' | 'rose' | 'mixed'
+
 export const MODAK: Record<ModakKind, { hunger: number; points: number }> = {
   ukadiche: { hunger: 0.22, points: 10 },
   talniche: { hunger: 0.4, points: 25 },
@@ -67,6 +81,59 @@ export function lastGateLabel(gatesReached: readonly GateId[]): string {
   const id = gatesReached[gatesReached.length - 1]
   if (!id) return 'none'
   return GATES.find((g) => g.id === id)?.name ?? 'none'
+}
+
+export function flowerPalette(distance: number): { stretch: FlowerStretch; colors: readonly string[] } {
+  if (distance < 80) return { stretch: 'marigold', colors: ['#ffc53d', '#ff8a1a', '#5ea04a'] }
+  if (distance < 180) return { stretch: 'jasmine', colors: ['#f4f0d8', '#fff4c8', '#6b8f4e'] }
+  if (distance < 300) return { stretch: 'hibiscus', colors: ['#d22b3a', '#e85d3a', '#e8a317'] }
+  if (distance < 440) return { stretch: 'lotus', colors: ['#f2a0b8', '#fff8ee'] }
+  if (distance < 600) return { stretch: 'rose', colors: ['#b81e48', '#ffc53d'] }
+  return {
+    stretch: 'mixed',
+    colors: ['#ffc53d', '#ff8a1a', '#5ea04a', '#f4f0d8', '#fff4c8', '#6b8f4e', '#d22b3a', '#e85d3a', '#e8a317', '#f2a0b8', '#fff8ee', '#b81e48'],
+  }
+}
+
+export function nearFlowerGate(atDistance: number): boolean {
+  return GATES.some((g) => Math.abs(g.distance - atDistance) < FLOWER_GATE_CLEAR)
+}
+
+export function liveGateId(gatesReached: readonly GateId[]): GateId | undefined {
+  return gatesReached[gatesReached.length - 1]
+}
+
+export function resumeDistance(gatesReached: readonly GateId[]): number {
+  const id = liveGateId(gatesReached)
+  const g = GATES.find((x) => x.id === id)
+  return g ? g.distance + PASS_M : 0
+}
+
+export function hudGateLine(phase: Phase, distance: number, gatesReached: readonly GateId[]): string {
+  if (phase === 'opening' || phase === 'shrine') {
+    const name = lastGateLabel(gatesReached)
+    return name === 'none' ? '' : name
+  }
+  return nextGateLine(distance)
+}
+
+export function doorOpenT(args: {
+  id: GateId
+  reached: boolean
+  phase: Phase
+  openingT: number | null
+  liveId: GateId | undefined
+}): number {
+  if (args.phase === 'opening' && args.id === args.liveId) return args.openingT ?? 0
+  return args.reached ? 1 : 0
+}
+
+export function shrineVideoUrl(id: GateId): string {
+  return assetUrl(`assets/mushika-run/shrines/${id}.mp4`)
+}
+
+export function shrineStillUrl(id: GateId): string {
+  return assetUrl(`assets/mushika-run/shrines/${id}.jpg`)
 }
 
 export function jumpY(jumpT: number | null): number {
