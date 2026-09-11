@@ -55,14 +55,14 @@ export function Gate({
         <meshStandardMaterial color="#e8a317" />
       </mesh>
       <group position={[-2.15, 0, 0]} rotation={[0, -Math.PI / 2 * open, 0]}>
-        <mesh position={[1.05, 1.1, 0]}>
-          <boxGeometry args={[2.1, 2.15, 0.08]} />
+        <mesh position={[1.075, 1.1, 0]}>
+          <boxGeometry args={[2.15, 2.15, 0.08]} />
           <meshStandardMaterial color="#7a3a18" />
         </mesh>
       </group>
       <group position={[2.15, 0, 0]} rotation={[0, Math.PI / 2 * open, 0]}>
-        <mesh position={[-1.05, 1.1, 0]}>
-          <boxGeometry args={[2.1, 2.15, 0.08]} />
+        <mesh position={[-1.075, 1.1, 0]}>
+          <boxGeometry args={[2.15, 2.15, 0.08]} />
           <meshStandardMaterial color="#7a3a18" />
         </mesh>
       </group>
