@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import { worldZ } from './constants'
 import { FlowersAlongRoad, TILE_LEN } from './FlowersAlongRoad'
 
@@ -56,9 +55,7 @@ export function Street({ distance }: { distance: number }) {
           <Tile variant={((i % 4) + 4) % 4} />
         </group>
       ))}
-      <Suspense fallback={null}>
-        <FlowersAlongRoad distance={distance} tiles={tiles} />
-      </Suspense>
+      <FlowersAlongRoad distance={distance} tiles={tiles} />
       <hemisphereLight args={['#ffe0b8', '#d4a060', 0.9]} />
       <ambientLight intensity={0.62} />
       <pointLight position={[0, 3.6, 3.2]} intensity={22} color="#ffe8c4" distance={24} />

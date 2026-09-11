@@ -22,11 +22,11 @@ https://github.com/rsms/inter — The Inter Project Authors. SIL OFL 1.1.
 
 ## Roadside Ganpati stills
 
-User-supplied festival images. Not CC0. Keep them experiment-local.
+User-supplied festival images. Not CC0. Keep them experiment-local. These `ganpati/*.jpg` files remain unused after flowers replaced the roadside boards.
 
 | File | Source | Notes |
 |---|---|---|
-| `ganpati/ganpati-1.jpg` … `ganpati-7.jpg` | `src/experiments/mushika-run/assets/sample/` | Portrait stills, resized to ≤1024px for roadside boards |
+| `ganpati/ganpati-1.jpg` … `ganpati-7.jpg` | `src/experiments/mushika-run/assets/sample/` | Portrait stills, resized to ≤1024px; unused after flowers replaced boards |
 
 ## Shrine clips (experiment-local, not CC0)
 

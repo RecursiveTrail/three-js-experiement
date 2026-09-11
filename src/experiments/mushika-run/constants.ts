@@ -22,7 +22,6 @@ export const HIGH_JUMP_MAX = 0.7
 export const LANE_LERP_S = 0.12
 export const HINT_S = 3
 export const HINT_DISTANCE = HINT_S * SPEED
-export const TOAST_MS = 1800
 export const GATE_POINTS = 100
 export const GATE_CLEAR_M = 5
 export const SPAWN_AHEAD_MIN = 20
@@ -108,7 +107,8 @@ export function resumeDistance(gatesReached: readonly GateId[]): number {
 }
 
 export function hudGateLine(phase: Phase, distance: number, gatesReached: readonly GateId[]): string {
-  if (phase === 'opening' || phase === 'shrine') {
+  if (phase === 'shrine') return ''
+  if (phase === 'opening') {
     const name = lastGateLabel(gatesReached)
     return name === 'none' ? '' : name
   }

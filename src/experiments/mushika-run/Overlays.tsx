@@ -78,6 +78,7 @@ export function ShrineBackdrop({ world }: { world: Snapshot }) {
     <video
       ref={videoRef}
       src={shrineVideoUrl(id)}
+      poster={shrineStillUrl(id)}
       muted
       loop
       playsInline
@@ -141,7 +142,9 @@ export function Overlays({ world }: { world: Snapshot }) {
           <span style={{ fontSize: 14, fontWeight: 500 }}>{gateLine}</span>
         </div>
         {shrine ? (
-          <div style={{ marginTop: 24, textAlign: 'center', fontSize: 22, fontWeight: 800 }}>{gateLine}</div>
+          <div style={{ marginTop: 24, textAlign: 'center', fontSize: 22, fontWeight: 800 }}>
+            {lastGateLabel(world.gatesReached)}
+          </div>
         ) : null}
         {shrine ? <div style={{ marginTop: 8, textAlign: 'center', fontSize: 15 }}>tap to continue</div> : null}
         {showHint ? <div style={{ marginTop: 10, fontSize: 15 }}>swipe to change lane · swipe up to jump</div> : null}

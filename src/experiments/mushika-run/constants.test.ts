@@ -153,9 +153,12 @@ describe('liveGateId and resumeDistance', () => {
 })
 
 describe('hudGateLine', () => {
-  it('is the name only during opening and shrine', () => {
+  it('is the name only during opening', () => {
     expect(hudGateLine('opening', 80, ['siddhivinayak'])).toBe('Siddhivinayak')
-    expect(hudGateLine('shrine', 80, ['siddhivinayak'])).toBe('Siddhivinayak')
+  })
+
+  it('is empty during shrine so the top-right does not repeat the name', () => {
+    expect(hudGateLine('shrine', 80, ['siddhivinayak'])).toBe('')
   })
 
   it('uses nextGateLine while playing', () => {

@@ -1,8 +1,30 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
-import { LANE_LERP_S, jumpY, laneX } from './constants'
+import { LANE_LERP_S, jumpY, laneX, type Phase } from './constants'
 import type { Snapshot } from './reduce'
+
+const FRONT_PAW_Z = 0.16
+
+export function groundBlobVisible(phase: Phase): boolean {
+  return phase !== 'shrine'
+}
+
+export function frontPawFrame(args: {
+  shrine: boolean
+  hopping: boolean
+  stride: number
+  side: -1 | 1
+}): { rotationX: number; rotationZ: number; z: number } {
+  if (args.shrine) {
+    return { rotationX: -1.5, rotationZ: args.side * 0.55, z: FRONT_PAW_Z + 0.12 }
+  }
+  return {
+    rotationX: args.hopping ? 0.75 : args.side * args.stride * 0.85,
+    rotationZ: 0,
+    z: FRONT_PAW_Z,
+  }
+}
 
 const SKIN = '#f4c45a'
 const BODY = '#e8b03a'
@@ -62,14 +84,17 @@ export function Mushika({ world }: { world: Snapshot }) {
       g.rotation.z = running ? stride * 0.05 : 0
       g.scale.set(1, hopping ? 1.1 : 1, 1)
     }
-    const namaste = shrine ? 0.95 : 0
+    const leftPaw = frontPawFrame({ shrine, hopping, stride, side: 1 })
+    const rightPaw = frontPawFrame({ shrine, hopping, stride, side: -1 })
     if (lf.current) {
-      lf.current.rotation.x = namaste ? -0.85 : hopping ? 0.75 : stride * 0.85
-      lf.current.rotation.z = namaste ? 0.55 : 0
+      lf.current.rotation.x = leftPaw.rotationX
+      lf.current.rotation.z = leftPaw.rotationZ
+      lf.current.position.z = leftPaw.z
     }
     if (rf.current) {
-      rf.current.rotation.x = namaste ? -0.85 : hopping ? 0.75 : -stride * 0.85
-      rf.current.rotation.z = namaste ? -0.55 : 0
+      rf.current.rotation.x = rightPaw.rotationX
+      rf.current.rotation.z = rightPaw.rotationZ
+      rf.current.position.z = rightPaw.z
     }
     if (lb.current) lb.current.rotation.x = hopping ? 0.55 : -stride * 0.75
     if (rb.current) rb.current.rotation.x = hopping ? 0.55 : stride * 0.75
@@ -91,6 +116,7 @@ export function Mushika({ world }: { world: Snapshot }) {
 
     const blob = shadow.current
     if (blob) {
+      blob.visible = groundBlobVisible(world.phase)
       blob.position.x = g.position.x
       blob.position.y = SHADOW_Y
       blob.position.z = 0

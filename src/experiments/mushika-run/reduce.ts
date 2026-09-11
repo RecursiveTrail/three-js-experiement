@@ -80,8 +80,7 @@ function clampLane(n: number): Lane {
   return n as Lane
 }
 
-function canCollect(s: Snapshot, m: Modak, freeze: boolean): boolean {
-  if (freeze) return false
+function canCollect(s: Snapshot, m: Modak): boolean {
   if (m.lane !== s.lane) return false
   if (Math.abs(m.atDistance - s.distance) > COLLECT_RADIUS) return false
   if (m.high) {
@@ -147,7 +146,7 @@ function tickPlaying(s: Snapshot, dt: number, rng: () => number): Snapshot {
   let score = next.score
   let nextModakId = next.nextModakId
   for (const m of next.modaks) {
-    if (canCollect(next, m, false)) {
+    if (canCollect(next, m)) {
       hunger = Math.min(1, hunger + MODAK[m.kind].hunger)
       score += MODAK[m.kind].points
       collected = true
