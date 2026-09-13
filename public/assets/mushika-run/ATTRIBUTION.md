@@ -22,8 +22,20 @@ https://github.com/rsms/inter — The Inter Project Authors. SIL OFL 1.1.
 
 ## Roadside Ganpati stills
 
-User-supplied festival images. Not CC0. Keep them experiment-local.
+User-supplied festival images. Not CC0. Keep them experiment-local. These `ganpati/*.jpg` files remain unused after flowers replaced the roadside boards.
 
 | File | Source | Notes |
 |---|---|---|
-| `ganpati/ganpati-1.jpg` … `ganpati-7.jpg` | `src/experiments/mushika-run/assets/sample/` | Portrait stills, resized to ≤1024px for roadside boards |
+| `ganpati/ganpati-1.jpg` … `ganpati-7.jpg` | `src/experiments/mushika-run/assets/sample/` | Portrait stills, resized to ≤1024px; unused after flowers replaced boards |
+
+## Shrine clips (experiment-local, not CC0)
+
+User-supplied. Game plays them muted. Until unique per-pandal clips exist, all five gate ids share the same Lalbaugcha Raja close-up (trimmed + compressed from the 9×16 cinematic). Replace any `{id}.mp4` / `{id}.jpg` in place later — no code change.
+
+| File | Source | Notes |
+|---|---|---|
+| `shrines/siddhivinayak.mp4` (+ `.jpg`) | stand-in: Lalbaug close-up | replace with Siddhivinayak, Prabhadevi |
+| `shrines/andhericha-raja.mp4` (+ `.jpg`) | stand-in: Lalbaug close-up | replace with Andhericha Raja, Versova |
+| `shrines/dagadusheth.mp4` (+ `.jpg`) | stand-in: Lalbaug close-up | replace with Dagadusheth Halwai, Pune |
+| `shrines/kasba-ganpati.mp4` (+ `.jpg`) | stand-in: Lalbaug close-up | replace with Kasba Ganpati, Pune |
+| `shrines/lalbaugcha-raja.mp4` (+ `.jpg`) | user cinematic `output/lalbaugcha-raja-cinematic-9x16.mp4` | 8.5–14.0 s close-up, silent H.264, 1080×1920, ~5.5 s / ~1.9 MB |

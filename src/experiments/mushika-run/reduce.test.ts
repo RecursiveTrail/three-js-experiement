@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SPEED } from './constants'
+import { SPEED, nextGateLine } from './constants'
 import { initialSnapshot, reduce, type Modak, type Snapshot } from './reduce'
 
 function seqRng(values: number[]) {
@@ -80,6 +80,8 @@ describe('collect', () => {
       quiet,
     )
     expect(next.score).toBe(50)
+    expect(next.eaten.king).toBe(1)
+    expect(next.eaten.ukadiche).toBe(0)
     expect(next.hunger).toBe(1)
     expect(next.modaks.some((m) => m.id === 1)).toBe(false)
     expect(next.cue).toBe('nibble')
@@ -113,49 +115,84 @@ describe('collect', () => {
 })
 
 describe('gates', () => {
-  it('awards Siddhivinayak once at 80 m and starts a celebration', () => {
+  it('awards Siddhivinayak once at 80 m and starts opening', () => {
     const hit = reduce(playing({ distance: 79, hunger: 0.8 }), { type: 'tick', dt: 0.2 }, quiet)
-    expect(hit.distance).toBeCloseTo(81)
+    expect(hit.phase).toBe('opening')
+    expect(hit.openingT).toBe(0)
+    expect(hit.shrineT).toBeNull()
+    expect(hit.distance).toBe(80)
     expect(hit.gatesReached).toEqual(['siddhivinayak'])
     expect(hit.score).toBe(100)
     expect(hit.cue).toBe('bell')
-    expect(hit.celebrateT).toBe(0)
     expect(hit.jumpT).toBeNull()
     const later = reduce(hit, { type: 'tick', dt: 1 }, quiet)
     expect(later.gatesReached).toEqual(['siddhivinayak'])
     expect(later.hunger).toBeCloseTo(0.8)
-    expect(later.celebrateT).toBeGreaterThan(0)
-    expect(later.celebrateT).toBeLessThan(1)
+    expect(later.distance).toBe(80)
+    expect(later.phase).toBe('shrine')
+    expect(later.shrineT).toBe(0)
+    expect(later.openingT).toBeNull()
   })
 
-  it('does not collect modaks or take a player jump during celebration', () => {
-    const next = reduce(
-      playing({
-        celebrateT: 0.2,
-        lane: 0,
-        hunger: 0.5,
-        distance: 81,
-        score: 100,
-        gatesReached: ['siddhivinayak'],
-        modaks: [{ id: 1, kind: 'king', lane: 0, high: false, atDistance: 81 }],
-      }),
-      { type: 'tick', dt: 0 },
-      quiet,
-    )
+  it('does not collect, drain, jump, or change lane during opening', () => {
+    const opened = playing({
+      phase: 'opening',
+      openingT: 0.2,
+      lane: 0,
+      hunger: 0.5,
+      distance: 80,
+      score: 100,
+      gatesReached: ['siddhivinayak'],
+      modaks: [{ id: 1, kind: 'king', lane: 0, high: false, atDistance: 80 }],
+    })
+    const next = reduce(opened, { type: 'tick', dt: 0 }, quiet)
     expect(next.modaks.some((m) => m.id === 1)).toBe(true)
     expect(next.score).toBe(100)
     expect(next.hunger).toBe(0.5)
     expect(reduce(next, { type: 'jump' }, quiet).jumpT).toBeNull()
+    expect(reduce(next, { type: 'jump' }, quiet).phase).toBe('opening')
+    expect(reduce(next, { type: 'laneRight' }, quiet).lane).toBe(0)
   })
 
-  it('ends the dance and resumes drain after 1.8 s', () => {
-    const end = reduce(playing({ celebrateT: 0.9, hunger: 0.8, gatesReached: ['siddhivinayak'] }), {
-      type: 'tick',
-      dt: 0.3,
-    }, quiet)
-    expect(end.celebrateT).toBeNull()
-    const after = reduce(end, { type: 'tick', dt: 1 }, quiet)
-    expect(after.hunger).toBeCloseTo(0.8 - 0.1 * 1.15)
+  it('skips shrine on jump and resumes at 82.5 m without restarting', () => {
+    const shrine = playing({
+      phase: 'shrine',
+      shrineT: 0.2,
+      hunger: 0.8,
+      score: 100,
+      distance: 80,
+      gatesReached: ['siddhivinayak'],
+    })
+    const skipped = reduce(shrine, { type: 'jump' }, quiet)
+    expect(skipped.phase).toBe('playing')
+    expect(skipped.distance).toBeCloseTo(82.5)
+    expect(skipped.score).toBe(100)
+    expect(skipped.hunger).toBeCloseTo(0.8)
+    expect(skipped.openingT).toBeNull()
+    expect(skipped.shrineT).toBeNull()
+    const drained = reduce(skipped, { type: 'tick', dt: 1 }, quiet)
+    expect(drained.hunger).toBeCloseTo(0.8 - 0.1 * 1.15)
+  })
+
+  it('auto-resumes after 4 s of shrine', () => {
+    const end = reduce(
+      playing({ phase: 'shrine', shrineT: 0.9, hunger: 0.8, distance: 80, gatesReached: ['siddhivinayak'] }),
+      { type: 'tick', dt: 0.5 },
+      quiet,
+    )
+    expect(end.phase).toBe('playing')
+    expect(end.distance).toBeCloseTo(82.5)
+  })
+
+  it('fifth-gate resume is beyond Lalbaugcha Raja', () => {
+    const ids = ['siddhivinayak', 'andhericha-raja', 'dagadusheth', 'kasba-ganpati', 'lalbaugcha-raja'] as const
+    const done = reduce(
+      playing({ phase: 'shrine', shrineT: 1, hunger: 0.5, gatesReached: [...ids], distance: 600 }),
+      { type: 'jump' },
+      quiet,
+    )
+    expect(done.distance).toBeCloseTo(602.5)
+    expect(nextGateLine(done.distance)).toBe('beyond Lalbaugcha Raja')
   })
 })
 
@@ -173,5 +210,16 @@ describe('restart', () => {
       const next = reduce(over, ev, quiet)
       expect(next).toEqual(initialSnapshot())
     }
+  })
+
+  it('does not restart from shrine via jump', () => {
+    const shrine = playing({
+      phase: 'shrine',
+      shrineT: 0,
+      score: 40,
+      distance: 80,
+      gatesReached: ['siddhivinayak'],
+    })
+    expect(reduce(shrine, { type: 'jump' }, quiet).score).toBe(40)
   })
 })

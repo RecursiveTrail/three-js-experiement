@@ -54,6 +54,13 @@ describe('subscribeMushikaInput', () => {
 
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft', bubbles: true }))
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'ArrowLeft', repeat: true, bubbles: true }))
+
+    const share = document.createElement('button')
+    share.setAttribute('data-skip-input', '')
+    root.appendChild(share)
+    share.dispatchEvent(new PointerEvent('pointerdown', { clientX: 8, clientY: 8, bubbles: true }))
+    share.dispatchEvent(new PointerEvent('pointerup', { clientX: 8, clientY: 8, bubbles: true }))
+
     active = false
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space', bubbles: true }))
 

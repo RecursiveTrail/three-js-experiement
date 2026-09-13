@@ -1,8 +1,71 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
-import { LANE_LERP_S, celebrateY, jumpY, laneX } from './constants'
+import { LANE_LERP_S, jumpY, laneX, type Phase } from './constants'
 import type { Snapshot } from './reduce'
+
+const FRONT_PAW_Z = 0.16
+
+export function groundBlobVisible(phase: Phase): boolean {
+  return phase !== 'shrine'
+}
+
+export function mushikaYaw(phase: Phase, shrineT: number | null): number {
+  if (phase === 'shrine' && shrineT !== null) return shrineBodyPose(shrineT).yaw
+  return Math.PI
+}
+
+export function shrineBodyPose(shrineT: number): {
+  yaw: number
+  pitch: number
+  roll: number
+  y: number
+  scale: number
+} {
+  const t = Math.min(1, Math.max(0, shrineT))
+  const scale = 0.4
+  if (t < 0.28) {
+    const u = t / 0.28
+    return { yaw: Math.PI, pitch: Math.sin(u * Math.PI) * 0.62, roll: 0, y: -0.12, scale }
+  }
+  if (t < 0.48) {
+    const u = (t - 0.28) / 0.2
+    return { yaw: Math.PI * (1 - u), pitch: 0.12 * (1 - u), roll: 0, y: -0.12, scale }
+  }
+  const u = (t - 0.48) / 0.52
+  return {
+    yaw: u * Math.PI * 4,
+    pitch: Math.sin(u * Math.PI * 4) * 0.1,
+    roll: Math.sin(u * Math.PI * 6) * 0.18,
+    y: -0.12 + Math.abs(Math.sin(u * Math.PI * 5)) * 0.14,
+    scale,
+  }
+}
+
+export function frontPawFrame(args: {
+  shrine: boolean
+  shrineT?: number
+  hopping: boolean
+  stride: number
+  side: -1 | 1
+}): { rotationX: number; rotationZ: number; z: number } {
+  if (args.shrine) {
+    if ((args.shrineT ?? 0) > 0.48) {
+      const wiggle = Math.sin((args.shrineT ?? 0) * Math.PI * 10)
+      return {
+        rotationX: -0.9 + args.side * wiggle * 0.45,
+        rotationZ: args.side * 0.25,
+        z: FRONT_PAW_Z + 0.08,
+      }
+    }
+    return { rotationX: -1.5, rotationZ: args.side * 0.55, z: FRONT_PAW_Z + 0.12 }
+  }
+  return {
+    rotationX: args.hopping ? 0.75 : args.side * args.stride * 0.85,
+    rotationZ: 0,
+    z: FRONT_PAW_Z,
+  }
+}
 
 const SKIN = '#f4c45a'
 const BODY = '#e8b03a'
@@ -40,52 +103,53 @@ export function Mushika({ world }: { world: Snapshot }) {
   useFrame(({ clock }, dt) => {
     const g = ref.current
     if (!g) return
-    const target = laneX(world.lane)
+    const shrine = world.phase === 'shrine'
+    const hopping = world.jumpT !== null
+    const running = world.phase === 'playing' && !hopping
+    const target = shrine ? 0 : laneX(world.lane)
     const k = 1 - Math.exp(-dt / LANE_LERP_S)
     g.position.x += (target - g.position.x) * k
-    const celebrating = world.celebrateT !== null
-    const hopping = world.jumpT !== null
-    const running = world.phase === 'playing' && !hopping && !celebrating
     const t = clock.elapsedTime * RUN
     const stride = running ? Math.sin(t) : 0
-    let y = celebrating ? celebrateY(world.celebrateT) : jumpY(world.jumpT)
+    let y = jumpY(world.jumpT)
     if (running) y += Math.abs(Math.sin(t * 2)) * 0.07
-    g.position.y = y
-    g.position.z = 0
-    if (celebrating) {
-      const c = world.celebrateT ?? 0
-      g.rotation.x = c * Math.PI * 4
-      g.rotation.y = Math.sin(c * Math.PI * 4) * 0.25
-      g.rotation.z = Math.sin(c * Math.PI * 4) * 0.12
-      g.scale.set(1.08, 1.16, 1.08)
+    g.position.z = shrine ? 0.05 : 0
+    if (shrine) {
+      const pose = shrineBodyPose(world.shrineT ?? 0)
+      g.rotation.set(pose.pitch, pose.yaw, pose.roll)
+      g.scale.setScalar(pose.scale)
+      g.position.y = pose.y
     } else {
+      g.position.y = y
       g.rotation.x = hopping ? -0.18 : running ? Math.abs(stride) * 0.05 : 0
-      g.rotation.y = 0
+      g.rotation.y = mushikaYaw(world.phase, world.shrineT)
       g.rotation.z = running ? stride * 0.05 : 0
       g.scale.set(1, hopping ? 1.1 : 1, 1)
     }
-
-    const lift = celebrating ? Math.sin((world.celebrateT ?? 0) * Math.PI * 4) * 0.9 : hopping ? 0.75 : 0
-    if (lf.current) lf.current.rotation.x = celebrating ? lift : lift || stride * 0.85
-    if (rf.current) rf.current.rotation.x = celebrating ? -lift : lift || -stride * 0.85
-    if (lb.current) lb.current.rotation.x = celebrating ? -lift * 0.7 : hopping ? 0.55 : -stride * 0.75
-    if (rb.current) rb.current.rotation.x = celebrating ? lift * 0.7 : hopping ? 0.55 : stride * 0.75
+    const leftPaw = frontPawFrame({ shrine, shrineT: world.shrineT ?? 0, hopping, stride, side: 1 })
+    const rightPaw = frontPawFrame({ shrine, shrineT: world.shrineT ?? 0, hopping, stride, side: -1 })
+    if (lf.current) {
+      lf.current.rotation.x = leftPaw.rotationX
+      lf.current.rotation.z = leftPaw.rotationZ
+      lf.current.position.z = leftPaw.z
+    }
+    if (rf.current) {
+      rf.current.rotation.x = rightPaw.rotationX
+      rf.current.rotation.z = rightPaw.rotationZ
+      rf.current.position.z = rightPaw.z
+    }
+    if (lb.current) lb.current.rotation.x = hopping ? 0.55 : -stride * 0.75
+    if (rb.current) rb.current.rotation.x = hopping ? 0.55 : stride * 0.75
 
     if (ears.current) {
-      ears.current.rotation.z = celebrating
-        ? Math.sin((world.celebrateT ?? 0) * Math.PI * 6) * 0.18
-        : running
-          ? stride * 0.08
-          : Math.sin(clock.elapsedTime * 2.2) * 0.03
+      ears.current.rotation.z = running
+        ? stride * 0.08
+        : Math.sin(clock.elapsedTime * 2.2) * 0.03
     }
 
-    const wag = celebrating
-      ? Math.sin((world.celebrateT ?? 0) * Math.PI * 8) * 0.8
-      : running
-        ? Math.sin(t * 0.9)
-        : Math.sin(clock.elapsedTime * 2.4) * 0.2
+    const wag = running ? Math.sin(t * 0.9) : Math.sin(clock.elapsedTime * 2.4) * 0.2
     if (tail.current) {
-      tail.current.rotation.x = celebrating ? -1.35 : hopping ? -1.15 : -0.45 + (running ? Math.sin(t) * 0.22 : 0)
+      tail.current.rotation.x = hopping ? -1.15 : -0.45 + (running ? Math.sin(t) * 0.22 : 0)
       tail.current.rotation.y = wag * 0.55
     }
     if (t1.current) t1.current.rotation.y = wag * 0.35
@@ -94,10 +158,11 @@ export function Mushika({ world }: { world: Snapshot }) {
 
     const blob = shadow.current
     if (blob) {
+      blob.visible = groundBlobVisible(world.phase)
       blob.position.x = g.position.x
       blob.position.y = SHADOW_Y
       blob.position.z = 0
-      const squash = celebrating || hopping ? 0.62 : 1
+      const squash = hopping ? 0.62 : 1
       blob.scale.set(squash, 1, squash)
     }
   })
@@ -110,7 +175,7 @@ export function Mushika({ world }: { world: Snapshot }) {
           <meshBasicMaterial color="#5a3018" transparent opacity={0.22} />
         </mesh>
       </group>
-      <group ref={ref} position={[0, 0, 0]}>
+      <group ref={ref} position={[0, 0, 0]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 0.28, 0.04]} scale={[1.05, 0.85, 1.25]}>
           <sphereGeometry args={[0.24, 18, 18]} />
           <meshStandardMaterial color={BODY} roughness={0.45} />

@@ -1,3 +1,5 @@
+import { assetUrl } from '../../shared/assetUrl'
+
 export type Lane = -1 | 0 | 1
 export type ModakKind = 'ukadiche' | 'talniche' | 'king'
 export type GateId =
@@ -13,8 +15,6 @@ export const DRAIN_GATE_MULT = 1.15
 export const DRAIN_GATE_CAP = 5
 export const JUMP_S = 0.45
 export const JUMP_HEIGHT = 0.7
-export const CELEBRATE_S = 1.8
-export const CELEBRATE_HEIGHT = 1.05
 export const LANE_SPACING = 1.3
 export const COLLECT_RADIUS = 0.7
 export const HIGH_JUMP_MIN = 0.3
@@ -22,7 +22,6 @@ export const HIGH_JUMP_MAX = 0.7
 export const LANE_LERP_S = 0.12
 export const HINT_S = 3
 export const HINT_DISTANCE = HINT_S * SPEED
-export const TOAST_MS = 1800
 export const GATE_POINTS = 100
 export const GATE_CLEAR_M = 5
 export const SPAWN_AHEAD_MIN = 20
@@ -31,11 +30,36 @@ export const DESPAWN_BEHIND = -4
 export const KING_GAP_M = 80
 export const DT_CAP = 0.05
 
-export const CAMERA_POS: [number, number, number] = [0, 2.4, 6.2]
+export const CAMERA_POS: [number, number, number] = [0, 2.55, 6.2]
 export const CAMERA_FOV = 50
-export const CAMERA_FOV_PORTRAIT = 58
-export const LOOK_AT: [number, number, number] = [0, 0.6, 0]
+export const CAMERA_FOV_PORTRAIT = 68
+export const LOOK_AT: [number, number, number] = [0, 0.95, 0]
+export const PLAY_ASPECT_W = 9
+export const PLAY_ASPECT_H = 16
 export const DPR: [number, number] = [1, 2]
+
+export const GATE_OPEN_S = 0.8
+export const SHRINE_S = 4
+export const PASS_M = 2.5
+export const SHRINE_CAMERA_POS: [number, number, number] = [0, 1.72, 4.05]
+export const SHRINE_LOOK_AT: [number, number, number] = [0, 1.28, 0]
+export const SHRINE_FALLBACK_FILL = '#1a0c10'
+export const FLOWER_SIDE_X = 2.55
+export const FLOWER_GATE_CLEAR = 10
+
+export function flowerBedXs(): number[] {
+  return [2.55, 3.3, 4.1, 4.9]
+}
+
+export function flowerBedZs(tileLen: number): number[] {
+  const zs: number[] = []
+  const step = 0.72
+  for (let z = -tileLen / 2 + 0.36; z <= tileLen / 2 - 0.28; z += step) zs.push(z)
+  return zs
+}
+
+export type Phase = 'playing' | 'opening' | 'shrine' | 'over'
+export type FlowerStretch = 'marigold' | 'jasmine' | 'hibiscus' | 'lotus' | 'rose' | 'mixed'
 
 export const MODAK: Record<ModakKind, { hunger: number; points: number }> = {
   ukadiche: { hunger: 0.22, points: 10 },
@@ -69,15 +93,63 @@ export function lastGateLabel(gatesReached: readonly GateId[]): string {
   return GATES.find((g) => g.id === id)?.name ?? 'none'
 }
 
+export function flowerPalette(distance: number): { stretch: FlowerStretch; colors: readonly string[] } {
+  if (distance < 80) return { stretch: 'marigold', colors: ['#ffc53d', '#ff8a1a', '#5ea04a'] }
+  if (distance < 180) return { stretch: 'jasmine', colors: ['#f4f0d8', '#fff4c8', '#6b8f4e'] }
+  if (distance < 300) return { stretch: 'hibiscus', colors: ['#d22b3a', '#e85d3a', '#e8a317'] }
+  if (distance < 440) return { stretch: 'lotus', colors: ['#f2a0b8', '#fff8ee'] }
+  if (distance < 600) return { stretch: 'rose', colors: ['#b81e48', '#ffc53d'] }
+  return {
+    stretch: 'mixed',
+    colors: ['#ffc53d', '#ff8a1a', '#5ea04a', '#f4f0d8', '#fff4c8', '#6b8f4e', '#d22b3a', '#e85d3a', '#e8a317', '#f2a0b8', '#fff8ee', '#b81e48'],
+  }
+}
+
+export function nearFlowerGate(atDistance: number): boolean {
+  return GATES.some((g) => Math.abs(g.distance - atDistance) < FLOWER_GATE_CLEAR)
+}
+
+export function liveGateId(gatesReached: readonly GateId[]): GateId | undefined {
+  return gatesReached[gatesReached.length - 1]
+}
+
+export function resumeDistance(gatesReached: readonly GateId[]): number {
+  const id = liveGateId(gatesReached)
+  const g = GATES.find((x) => x.id === id)
+  return g ? g.distance + PASS_M : 0
+}
+
+export function hudGateLine(phase: Phase, distance: number, gatesReached: readonly GateId[]): string {
+  if (phase === 'shrine') return ''
+  if (phase === 'opening') {
+    const name = lastGateLabel(gatesReached)
+    return name === 'none' ? '' : name
+  }
+  return nextGateLine(distance)
+}
+
+export function doorOpenT(args: {
+  id: GateId
+  reached: boolean
+  phase: Phase
+  openingT: number | null
+  liveId: GateId | undefined
+}): number {
+  if (args.phase === 'opening' && args.id === args.liveId) return args.openingT ?? 0
+  return args.reached ? 1 : 0
+}
+
+export function shrineVideoUrl(id: GateId): string {
+  return assetUrl(`assets/mushika-run/shrines/${id}.mp4`)
+}
+
+export function shrineStillUrl(id: GateId): string {
+  return assetUrl(`assets/mushika-run/shrines/${id}.jpg`)
+}
+
 export function jumpY(jumpT: number | null): number {
   if (jumpT === null) return 0
   return JUMP_HEIGHT * Math.sin(Math.PI * jumpT)
-}
-
-/** Two hops during a pandal blessing (0..1). */
-export function celebrateY(celebrateT: number | null): number {
-  if (celebrateT === null) return 0
-  return CELEBRATE_HEIGHT * Math.abs(Math.sin(Math.PI * 2 * celebrateT))
 }
 
 export function worldZ(atDistance: number, distance: number): number {

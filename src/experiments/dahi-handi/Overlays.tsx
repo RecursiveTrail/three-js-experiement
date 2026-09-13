@@ -15,7 +15,7 @@ export function Overlays({ smashCount }: { smashCount: number }) {
     >
       <div style={{ pointerEvents: 'auto', padding: 16 }}>
         <Link to="/" style={{ color: '#fff' }}>
-          All experiments
+          Home
         </Link>
       </div>
       <div style={{ position: 'absolute', left: 16, bottom: 24 }}>

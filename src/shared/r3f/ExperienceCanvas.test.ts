@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ExperienceCanvas } from './ExperienceCanvas'
+import { ExperienceCanvas, experienceGl } from './ExperienceCanvas'
 import { Yard } from '../../experiments/cat-world/Yard'
 
 describe('yard exports', () => {
@@ -9,4 +9,15 @@ describe('yard exports', () => {
   })
 })
 
-// dpr is optional on ExperienceCanvas; Mushika Run passes [1, 2], other scenes omit it.
+describe('experienceGl', () => {
+  it('defaults to an opaque canvas', () => {
+    expect(experienceGl()).toEqual({ antialias: true, alpha: false })
+    expect(experienceGl(undefined)).toEqual({ antialias: true, alpha: false })
+  })
+
+  it('opts into alpha when true', () => {
+    expect(experienceGl(true)).toEqual({ antialias: true, alpha: true })
+  })
+})
+
+// dpr and alpha are optional on ExperienceCanvas; only Mushika Run passes both.

@@ -19,9 +19,9 @@ export function commandFromKey(event: KeyboardEvent): Command | null {
   return null
 }
 
-function isLinkTarget(event: Event): boolean {
+function skipInputTarget(event: Event): boolean {
   const t = event.target
-  return t instanceof Element && t.closest('a') !== null
+  return t instanceof Element && (t.closest('a') !== null || t.closest('[data-skip-input]') !== null)
 }
 
 export function subscribeMushikaInput(
@@ -41,7 +41,7 @@ export function subscribeMushikaInput(
   }
 
   const onPointerDown = (event: PointerEvent) => {
-    down = { x: event.clientX, y: event.clientY, ignore: isLinkTarget(event), pointerId: event.pointerId }
+    down = { x: event.clientX, y: event.clientY, ignore: skipInputTarget(event), pointerId: event.pointerId }
     try {
       root.setPointerCapture(event.pointerId)
     } catch {
